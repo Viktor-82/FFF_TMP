@@ -88,7 +88,7 @@ private class ApplePayContextClosureDelegate: NSObject, ApplePayContextDelegate 
             case .client:
                 return .client
             case .none:
-                return STPAnalyticsClient.DeferredIntentConfirmationType.none
+                return .completeWithoutConfirmingIntent
             }
         }()
         switch status {
@@ -184,7 +184,7 @@ extension STPApplePayContext {
             }
         }
 
-        if intent.isSettingUp {
+        if intent.isSetupFutureUsageSet(for: .card) {
             // Disable Apple Pay Later if the merchant is setting up the payment method for future usage
 #if compiler(>=5.9)
             if #available(macOS 14.0, iOS 17.0, *) {
@@ -192,7 +192,7 @@ extension STPApplePayContext {
             }
 #endif
         }
-        
+
         // Update list of `supportedNetworks` based on the merchant's configuration of cardBrandAcceptance
         paymentRequest.supportedNetworks = paymentRequest.supportedNetworks.filter { configuration.cardBrandFilter.isAccepted(cardBrand: $0.asCardBrand) }
 

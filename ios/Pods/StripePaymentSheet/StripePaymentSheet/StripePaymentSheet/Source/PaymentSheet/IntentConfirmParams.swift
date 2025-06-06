@@ -45,11 +45,14 @@ final class IntentConfirmParams {
         }
     }
 
-    func makeIcon(updateImageHandler: DownloadManager.UpdateImageHandler?) -> UIImage {
+    /// True if the customer opts to save their payment method as their default payment method.
+    var setAsDefaultPM: Bool?
+
+    func makeIcon(currency: String?, updateImageHandler: DownloadManager.UpdateImageHandler?) -> UIImage {
         if let bankName = (financialConnectionsLinkedBank?.bankName ?? instantDebitsLinkedBank?.bankName) {
             return PaymentSheetImageLibrary.bankIcon(for: PaymentSheetImageLibrary.bankIconCode(for: bankName))
         } else {
-            return paymentMethodParams.makeIcon(updateHandler: updateImageHandler)
+            return paymentMethodParams.makeIcon(currency: currency, updateHandler: updateImageHandler)
         }
     }
 
@@ -177,6 +180,7 @@ extension STPConfirmPaymentMethodOptions {
      */
     func setSetupFutureUsageIfNecessary(
         _ shouldSave: Bool,
+        currentSetupFutureUsage: String? = nil,
         paymentMethodType: STPPaymentMethodType,
         customer: PaymentSheet.CustomerConfiguration?
     ) {
@@ -186,10 +190,8 @@ extension STPConfirmPaymentMethodOptions {
         guard customer != nil && paymentMethodType == .card || paymentMethodType == .USBankAccount else {
             return
         }
-        // Note: The API officially only allows the values "off_session", "on_session", and "none".
-        // Passing "none" *overrides* the top-level setup_future_usage and is not what we want, b/c this code is called even when we don't display the "save" checkbox (e.g. when the PI top-level setup_future_usage is already set).
-        // Instead, we pass an empty string to 'unset' this value. This makes the PaymentIntent *inherit* the top-level setup_future_usage.
-        let sfuValue = shouldSave ? "off_session" : ""
+
+        let sfuValue = shouldSave ? "off_session" : currentSetupFutureUsage ?? ""
         switch paymentMethodType {
         case .card:
             cardOptions = cardOptions ?? STPConfirmCardOptions()

@@ -58,10 +58,11 @@ class VerticalListMandateProvider: MandateTextProvider {
             let form = PaymentSheetFormFactory(
                 intent: intent,
                 elementsSession: elementsSession,
-                configuration: .paymentSheet(configuration),
+                configuration: .paymentElement(configuration),
                 paymentMethod: paymentMethodType,
                 previousCustomerInput: nil,
                 linkAccount: LinkAccountContext.shared.account,
+                accountService: LinkAccountService(apiClient: configuration.apiClient, elementsSession: elementsSession),
                 analyticsHelper: analyticsHelper
             ).make()
 

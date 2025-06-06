@@ -18,6 +18,8 @@
 
 "Add your payment information" = "添加您的支付信息";
 
+"Agree and continue" = "同意并继续";
+
 "Approve payment" = "批准付款";
 
 "Are you sure you want to remove this card?" = "您确定要移除此卡吗？";
@@ -32,9 +34,11 @@
 
 "Bank account details cannot be changed." = "无法更改银行账户详情。";
 
-"Buy now or pay later with <img/>" = "用 <img/> 先买后付";
+"Buy now or pay later with  <img/>" = "用 <img/> 先买后付";
 
 "Buy now or pay later with Afterpay" = "用 Afterpay 先买后付";
+
+"Buy now or pay later with Cash App Afterpay" = "用 Cash App Afterpay 先买后付";
 
 "Buy now or pay later with Clearpay" = "用 Clearpay 先买后付";
 
@@ -51,6 +55,8 @@
 "By continuing to PayPal, you allow %@ to charge your PayPal account for future payments in accordance with their terms." = "继续前往 PayPal 即表示您允许 %@ 按照他们的条款从您的 PayPal 扣取未来款项。";
 
 "By continuing to Revolut Pay, you allow %@ to charge your Revolut Pay account for future payments in accordance with their terms." = "继续前往 Revolut Pay 即表示您允许 %@ 按照他们的条款从您的 Revolut Pay 扣取未来款项。";
+
+"By continuing you agree to the <terms>Terms</terms> and <privacy>Privacy Policy</privacy>." = "继续即表示您同意<terms>条款</terms>和<privacy>隐私政策</privacy>。";
 
 "By continuing, you agree to authorize payments pursuant to <terms>these terms</terms>." = "继续操作即表示您同意按照<terms>这些条款</terms>授权付款。";
 
@@ -76,7 +82,7 @@
 
 "Card details cannot be changed." = "无法更改银行卡详情。";
 
-"Change email" = "更改邮件地址";
+"Change" = "更改";
 
 "Choose a payment method" = "选择一个支付方式";
 
@@ -86,6 +92,10 @@
 
 "Confirm" = "确定";
 
+"Confirm it's you" = "确认是您本人";
+
+"Confirm payment details" = "确认支付详情";
+
 "Confirm the payment in your bank or payment app within %@ to complete the purchase." = "在您的银行或支付应用程序中确认向 %@ 的付款，以完成购物。";
 
 "Confirm the payment in your bank's app within %@ to complete the purchase." = "%@内在您的银行应用中确认付款，完成购物。";
@@ -94,25 +104,33 @@
 
 "Contact information" = "联系信息";
 
+"Continue another way" = "用另一方式继续";
+
 "Default" = "默认";
+
+"Default payment method" = "默认支付方式";
 
 "EPS Bank" = "EPS 银行";
 
 "Enter address manually" = "手动输入地址";
 
-"Enter the code sent to %@ to use Link to pay by default." = "输入发送到 %@ 的验证码，以默认用 Link 支付。";
-
-"Enter your verification code" = "输入您的验证码";
+"Enter the code sent to %@ to use your saved information." = "输入发送到 %@ 的验证码来使用您保存的信息。";
 
 "FPX Bank" = "FPX 银行";
 
+"Failed to connect" = "连接失败";
+
+"Fast, secure, 1⁠-⁠click checkout" = "快速安全地一键结账";
+
 "For security, please re-enter your card’s security code." = "出于安全原因，请重新输入您的银行卡的安全码。";
+
+"Get %@ back when you pay for the first time with your bank. <terms>See terms</terms>" = "通过您的银行首次支付时获得 %@ 的返现。<terms>查看条款</terms>";
+
+"Get %@ back when you pay with your bank. <terms>See terms</terms>" = "通过您的银行支付时获得 %@ 的返现。<terms>查看条款</terms>";
 
 "I understand that Stripe will be collecting Direct Debits on behalf of %@ and confirm that I am the account holder and the only person required to authorise debits from this account." = "我理解 Stripe 将代表 %@ 收取直接借记，且确认我是该账户持有人，且是唯一一个需要授权该账户扣款的人。";
 
 "IBAN" = "IBAN";
-
-"Join Link" = "加入 Link";
 
 "Log out of Link" = "退出 Link";
 
@@ -121,6 +139,8 @@
 "Manage US bank account" = "管理美国银行账户";
 
 "Manage card" = "管理卡";
+
+"Manage cards" = "管理银行卡";
 
 "Manage payment method" = "管理支付方式";
 
@@ -134,7 +154,7 @@
 
 "New payment method" = "新支付方式";
 
-"Not %@?" = "不是 %@？";
+"No %@ promo" = "无 %@ 促销";
 
 "Only card brand can be changed." = "只可更改银行卡品牌。";
 
@@ -170,6 +190,8 @@
 
 "Payment methods" = "支付方式";
 
+"Please choose a valid payment method." = "请选择一个有效的支付方式。";
+
 "Please go back and select another payment method" = "请返回并选择另一个支付方式。";
 
 "Point the camera at your card." = "将摄像头正对银行卡。";
@@ -202,9 +224,9 @@
 
 "Save your info for secure 1-click checkout with Link" = "保存您的信息，用 Link 安全地一键结账";
 
-"Saved" = "已保存";
+"Save your payment information with Link, and securely check out in 1-click on Link-supported sites." = "用 Link 保存您的支付信息，并在支持 Link 的网站上一键安全结账。";
 
-"Secure 1⁠-⁠click checkout" = "安全地一键结账";
+"Saved" = "已保存";
 
 "Select card" = "选择卡";
 
@@ -221,8 +243,6 @@
 "Shipping to %@ is not supported." = "不支持向 %@ 配送。";
 
 "Show menu" = "显示菜单";
-
-"Sign in to your Link account" = "登录您的 Link 账户";
 
 "Simple, secure one-click payments" = "简单、安全的一键支付";
 

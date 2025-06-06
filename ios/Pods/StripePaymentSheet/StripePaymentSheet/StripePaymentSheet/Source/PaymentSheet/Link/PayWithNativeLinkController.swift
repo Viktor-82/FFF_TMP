@@ -53,9 +53,10 @@ final class PayWithNativeLinkController {
         let payWithLinkViewController = PayWithLinkViewController(intent: intent,
                                                                   elementsSession: elementsSession, configuration: configuration, analyticsHelper: analyticsHelper)
         payWithLinkViewController.payWithLinkDelegate = self
-        payWithLinkViewController.modalPresentationStyle = UIDevice.current.userInterfaceIdiom == .pad
-            ? .formSheet
-            : .overFullScreen
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            payWithLinkViewController.modalPresentationStyle = .formSheet
+        }
+        payWithLinkViewController.isModalInPresentation = true
 
         presentingController.present(payWithLinkViewController, animated: true)
     }
@@ -91,10 +92,40 @@ extension PayWithNativeLinkController: PayWithLinkViewControllerDelegate {
         selfRetainer = nil
     }
 
-    func payWithLinkViewControllerDidFinish(_ payWithLinkViewController: PayWithLinkViewController, result: PaymentSheetResult) {
+    func payWithLinkViewControllerDidFinish(_ payWithLinkViewController: PayWithLinkViewController, result: PaymentSheetResult, deferredIntentConfirmationType: STPAnalyticsClient.DeferredIntentConfirmationType?) {
         payWithLinkViewController.dismiss(animated: true)
-        completion?(result, nil)
+        completion?(result, deferredIntentConfirmationType)
         selfRetainer = nil
     }
 
+}
+
+// Used if the native controlled falls back to the web controller
+// We may want to refactor this someday to merge PayWithNativeLinkController and PayWithWebLinkController.
+extension PayWithNativeLinkController: PayWithLinkWebControllerDelegate {
+    func payWithLinkWebControllerDidComplete(
+        _ payWithLinkWebController: PayWithLinkWebController,
+        intent: Intent,
+        elementsSession: STPElementsSession,
+        with paymentOption: PaymentOption
+    ) {
+        PaymentSheet.confirm(
+            configuration: configuration,
+            authenticationContext: payWithLinkWebController,
+            intent: intent,
+            elementsSession: elementsSession,
+            paymentOption: paymentOption,
+            paymentHandler: paymentHandler,
+            integrationShape: .complete,
+            analyticsHelper: analyticsHelper
+        ) { result, deferredIntentConfirmationType in
+            self.completion?(result, deferredIntentConfirmationType)
+            self.selfRetainer = nil
+        }
+    }
+
+    func payWithLinkWebControllerDidCancel() {
+        completion?(.canceled, nil)
+        selfRetainer = nil
+    }
 }

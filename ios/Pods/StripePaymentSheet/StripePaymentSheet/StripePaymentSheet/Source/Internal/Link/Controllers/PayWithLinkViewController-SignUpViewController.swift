@@ -10,6 +10,7 @@ import SafariServices
 import UIKit
 
 @_spi(STP) import StripeCore
+@_exported @_spi(STP) import StripePayments
 @_spi(STP) import StripeUICore
 
 extension PayWithLinkViewController {
@@ -28,7 +29,7 @@ extension PayWithLinkViewController {
             label.numberOfLines = 0
             label.textAlignment = .center
             label.text = STPLocalizedString(
-                "Secure 1⁠-⁠click checkout",
+                "Fast, secure, 1⁠-⁠click checkout",
                 "Title for the Link signup screen"
             )
             return label
@@ -41,13 +42,11 @@ extension PayWithLinkViewController {
             label.adjustsFontForContentSizeCategory = true
             label.numberOfLines = 0
             label.textAlignment = .center
-            label.text = String.Localized.pay_faster_at_$merchant_and_thousands_of_merchants(
-                merchantDisplayName: context.configuration.merchantDisplayName
-            )
+            label.text = String.Localized.save_your_payment_information_with_link
             return label
         }()
 
-        private lazy var emailElement = LinkEmailElement(defaultValue: viewModel.emailAddress, showLogo: true, theme: LinkUI.appearance.asElementsTheme)
+        private lazy var emailElement = LinkEmailElement(defaultValue: viewModel.emailAddress, showLogo: false, theme: LinkUI.appearance.asElementsTheme)
 
         private lazy var phoneNumberElement = PhoneNumberElement(
             defaultCountryCode: context.configuration.defaultBillingDetails.address.country,
@@ -70,7 +69,7 @@ extension PayWithLinkViewController {
         private lazy var nameSection = SectionElement(elements: [nameElement], theme: LinkUI.appearance.asElementsTheme)
 
         private lazy var legalTermsView: LinkLegalTermsView = {
-            let legalTermsView = LinkLegalTermsView(textAlignment: .center)
+            let legalTermsView = LinkLegalTermsView(textAlignment: .center, isStandalone: true)
             legalTermsView.tintColor = .linkBrandDark
             legalTermsView.delegate = self
             return legalTermsView
@@ -85,10 +84,7 @@ extension PayWithLinkViewController {
         private lazy var signUpButton: Button = {
             let button = Button(
                 configuration: .linkPrimary(),
-                title: STPLocalizedString(
-                    "Join Link",
-                    "Title for a button that when tapped creates a Link account for the user."
-                )
+                title: viewModel.signUpButtonTitle
             )
             button.addTarget(self, action: #selector(didTapSignUpButton(_:)), for: .touchUpInside)
             button.adjustsFontForContentSizeCategory = true
@@ -96,7 +92,7 @@ extension PayWithLinkViewController {
             return button
         }()
 
-        private lazy var stackView: UIStackView = {
+        private(set) lazy var stackView: UIStackView = {
             let stackView = UIStackView(arrangedSubviews: [
                 titleLabel,
                 subtitleLabel,
@@ -125,7 +121,7 @@ extension PayWithLinkViewController {
         ) {
             self.viewModel = SignUpViewModel(
                 configuration: context.configuration,
-                accountService: LinkAccountService(apiClient: context.configuration.apiClient),
+                accountService: LinkAccountService(apiClient: context.configuration.apiClient, elementsSession: context.elementsSession),
                 linkAccount: linkAccount,
                 country: context.elementsSession.countryCode
             )
@@ -153,6 +149,11 @@ extension PayWithLinkViewController {
         override func viewDidAppear(_ animated: Bool) {
             super.viewDidAppear(animated)
             STPAnalyticsClient.sharedClient.logLinkSignupFlowPresented()
+
+            // If the email field is empty, select it
+            if emailElement.emailAddressString?.isEmpty ?? false {
+                emailElement.beginEditing()
+            }
         }
 
         private func setupBindings() {
@@ -167,7 +168,7 @@ extension PayWithLinkViewController {
             nameElement.delegate = self
         }
 
-        private func updateUI(animated: Bool = false) {
+        func updateUI(animated: Bool = false) {
             if viewModel.isLookingUpLinkAccount {
                 emailElement.startAnimating()
             } else {
@@ -204,12 +205,7 @@ extension PayWithLinkViewController {
             )
 
             // Signup button
-            stackView.toggleArrangedSubview(
-                signUpButton,
-                shouldShow: viewModel.shouldShowSignUpButton,
-                animated: animated
-            )
-
+            signUpButton.title = viewModel.signUpButtonTitle
             signUpButton.isEnabled = viewModel.shouldEnableSignUpButton
         }
 
@@ -218,15 +214,23 @@ extension PayWithLinkViewController {
             signUpButton.isLoading = true
 
             viewModel.signUp { [weak self] result in
+                guard let self else {
+                    return
+                }
+
                 switch result {
                 case .success(let account):
-                    self?.coordinator?.accountUpdated(account)
+                    // We can't access the following fields used for signup via the consumer session,
+                    // so we keep track of it on the client.
+                    account.phoneNumberUsedInSignup = self.viewModel.phoneNumber?.string(as: .e164)
+                    account.nameUsedInSignup = self.viewModel.legalName
+                    self.coordinator?.accountUpdated(account)
                     STPAnalyticsClient.sharedClient.logLinkSignupComplete()
                 case .failure(let error):
                     STPAnalyticsClient.sharedClient.logLinkSignupFailure(error: error)
                 }
 
-                self?.signUpButton.isLoading = false
+                self.signUpButton.isLoading = false
             }
         }
 
@@ -235,6 +239,9 @@ extension PayWithLinkViewController {
 }
 
 extension PayWithLinkViewController.SignUpViewController: PayWithLinkSignUpViewModelDelegate {
+    func viewModelDidEncounterAttestationError(_ viewModel: PayWithLinkViewController.SignUpViewModel) {
+        self.coordinator?.bailToWebFlow()
+    }
 
     func viewModelDidChange(_ viewModel: PayWithLinkViewController.SignUpViewModel) {
         updateUI(animated: true)

@@ -44,6 +44,41 @@ final public class FinancialConnectionsSheet {
         }
     }
 
+    /// Configuration for the Financial Connections Sheet.
+    public struct Configuration {
+        /// Style options for colors in Financial Connections.
+        @frozen public enum UserInterfaceStyle {
+            /// (default)  Financial Connections will automatically switch between light and dark mode compatible colors based on device settings.
+            case automatic
+
+            /// Financial Connections will always use colors appropriate for light mode UI.
+            case alwaysLight
+
+            /// Financial Connections will always use colors appropriate for dark mode UI.
+            case alwaysDark
+
+            /// Applies the specified user interface style to the given view controller.
+            func configure(_ viewController: UIViewController?) {
+                guard let viewController else { return }
+
+                switch self {
+                case .automatic:
+                    break
+                case .alwaysLight:
+                    viewController.overrideUserInterfaceStyle = .light
+                case .alwaysDark:
+                    viewController.overrideUserInterfaceStyle = .dark
+                }
+            }
+        }
+
+        public var style: UserInterfaceStyle
+
+        public init(style: UserInterfaceStyle = .automatic) {
+            self.style = style
+        }
+    }
+
     // MARK: - Properties
 
     /**
@@ -72,17 +107,22 @@ final public class FinancialConnectionsSheet {
         }
     }
 
+    /// Contains all configurable properties of Financial Connections.
+    public let configuration: FinancialConnectionsSheet.Configuration
+
+    /// An internal result type that holds a `HostControllerResult` and an optional Link Account Session ID for logging.
+    private typealias HostControllerOutcome = (result: HostControllerResult, sessionId: String?)
     /// Completion block called when the sheet is closed or fails to open
-    private var completion: ((HostControllerResult) -> Void)?
+    private var completion: ((HostControllerOutcome) -> Void)?
 
     private var hostController: HostController?
 
     private var wrapperViewController: ModalPresentationWrapperViewController?
 
-    // Any additional Elements context useful for the Financial Connections SDK.
+    /// Any additional Elements context useful for the Financial Connections SDK.
     @_spi(STP) public var elementsSessionContext: StripeCore.ElementsSessionContext?
 
-    // Analytics client to use for logging analytics
+    /// Analytics client to use for logging analytics
     @_spi(STP) public let analyticsClient: STPAnalyticsClientProtocol
 
     // MARK: - Init
@@ -93,11 +133,17 @@ final public class FinancialConnectionsSheet {
      - Parameters:
        - financialConnectionsSessionClientSecret: The [client secret](https://stripe.com/docs/api/financial_connections/sessions/object#financial_connections_session_object-client_secret) of a Stripe FinancialConnectionsSession object.
        - returnURL: A URL that redirects back to your application. FinancialConnectionsSheet uses it after completing authentication in another application (such as a bank application or Safari).
+       - configuration: Allows configuring the FinancialConnectionsSheet, such as style options for appearance preferences.
      */
-    public convenience init(financialConnectionsSessionClientSecret: String, returnURL: String? = nil) {
+    public convenience init(
+        financialConnectionsSessionClientSecret: String,
+        returnURL: String? = nil,
+        configuration: FinancialConnectionsSheet.Configuration = .init()
+    ) {
         self.init(
             financialConnectionsSessionClientSecret: financialConnectionsSessionClientSecret,
             returnURL: returnURL,
+            configuration: configuration,
             analyticsClient: STPAnalyticsClient.sharedClient
         )
     }
@@ -105,18 +151,25 @@ final public class FinancialConnectionsSheet {
     init(
         financialConnectionsSessionClientSecret: String,
         returnURL: String?,
+        configuration: FinancialConnectionsSheet.Configuration,
         analyticsClient: STPAnalyticsClientProtocol
     ) {
         self.financialConnectionsSessionClientSecret = financialConnectionsSessionClientSecret
         self.returnURL = returnURL
+        self.configuration = configuration
         self.analyticsClient = analyticsClient
 
         analyticsClient.addClass(toProductUsageIfNecessary: FinancialConnectionsSheet.self)
         APIVersion.configureFinancialConnectionsAPIVersion(apiClient: apiClient)
+        PresentationManager.shared.configuration = configuration
     }
 
     // MARK: - Public
 
+    /// Presents a sheet for a customer to connect their financial account. This API surfaces details on the connected bank account token.
+    /// - Parameters:
+    ///   - presentingViewController: The view controller to present the financial connections sheet.
+    ///   - completion: The result of the financial connections session after the financial connections sheet is dismissed, along with the bank account token.
     public func presentForToken(
         from presentingViewController: UIViewController,
         completion: @escaping (TokenResult) -> Void
@@ -133,11 +186,23 @@ final public class FinancialConnectionsSheet {
         }
     }
 
+    /// Presents a sheet for a customer to connect their financial account. This API surfaces details on the connected bank account token.
+    /// - Parameter presentingViewController: The view controller to present the financial connections sheet.
+    /// - Returns: The result of the financial connections session after the financial connections sheet is dismissed, along with the bank account token.
+    @MainActor
+    @_spi(v25) public func presentForToken(from presentingViewController: UIViewController) async -> TokenResult {
+        await withCheckedContinuation { continuation in
+            presentForToken(from: presentingViewController) { (result: TokenResult) in
+                continuation.resume(returning: result)
+            }
+        }
+    }
+
     /**
      Presents a sheet for a customer to connect their financial account.
      - Parameters:
        - presentingViewController: The view controller to present the financial connections sheet.
-       - completion: Called with the result of the financial connections session after the financial connections  sheet is dismissed.
+       - completion: Called with the result of the financial connections session after the financial connections sheet is dismissed.
      */
     public func present(
         from presentingViewController: UIViewController,
@@ -177,20 +242,32 @@ final public class FinancialConnectionsSheet {
         )
     }
 
+    /// Presents a sheet for a customer to connect their financial account.
+    /// - Parameter presentingViewController: The view controller to present the financial connections sheet.
+    /// - Returns: The result of the financial connections session after the financial connections sheet is dismissed.
+    @MainActor
+    @_spi(v25) public func present(from presentingViewController: UIViewController) async -> Result {
+        await withCheckedContinuation { continuation in
+            present(from: presentingViewController) { (result: Result) in
+                continuation.resume(returning: result)
+            }
+        }
+    }
+
     @_spi(STP) public func present(
         from presentingViewController: UIViewController,
         completion: @escaping (HostControllerResult) -> Void
     ) {
         // Overwrite completion closure to retain self until called
-        let completion: (HostControllerResult) -> Void = { result in
+        let completion: (HostControllerOutcome) -> Void = { outcome in
             self.analyticsClient.log(
                 analytic: FinancialConnectionsSheetCompletionAnalytic.make(
-                    clientSecret: self.financialConnectionsSessionClientSecret,
-                    result: result
+                    linkAccountSessionId: outcome.sessionId,
+                    result: outcome.result
                 ),
                 apiClient: self.apiClient
             )
-            completion(result)
+            completion(outcome.result)
             self.completion = nil
         }
         self.completion = completion
@@ -201,7 +278,8 @@ final public class FinancialConnectionsSheet {
             let error = FinancialConnectionsSheetError.unknown(
                 debugDescription: "presentingViewController is already presenting a view controller"
             )
-            completion(.failed(error: error))
+            let flowResult = HostControllerOutcome(result: .failed(error: error), sessionId: nil)
+            completion(flowResult)
             return
         }
 
@@ -214,18 +292,20 @@ final public class FinancialConnectionsSheet {
                     debugDescription:
                         "invalid returnURL: \(urlString) parameter passed in when creating FinancialConnectionsSheet"
                 )
-                completion(.failed(error: error))
+                let flowResult = HostControllerOutcome(result: .failed(error: error), sessionId: nil)
+                completion(flowResult)
                 return
             }
         }
 
-        let financialConnectionsApiClient = FinancialConnectionsAPIClient(apiClient: apiClient)
+        let financialConnectionsApiClient: any FinancialConnectionsAPI = FinancialConnectionsAsyncAPIClient(apiClient: apiClient)
         hostController = HostController(
             apiClient: financialConnectionsApiClient,
             analyticsClientV1: analyticsClient,
             clientSecret: financialConnectionsSessionClientSecret,
-            elementsSessionContext: elementsSessionContext,
             returnURL: returnURL,
+            configuration: configuration,
+            elementsSessionContext: elementsSessionContext,
             publishableKey: apiClient.publishableKey,
             stripeAccount: apiClient.stripeAccount
         )
@@ -233,7 +313,8 @@ final public class FinancialConnectionsSheet {
 
         analyticsClient.log(
             analytic: FinancialConnectionsSheetPresentedAnalytic(
-                clientSecret: self.financialConnectionsSessionClientSecret
+                // We don't have the session ID yet.
+                linkAccountSessionId: nil
             ),
             apiClient: apiClient
         )
@@ -256,7 +337,7 @@ final public class FinancialConnectionsSheet {
             toPresent = wrapperViewController!
             animated = false
         }
-        presentingViewController.present(toPresent, animated: animated, completion: nil)
+        PresentationManager.shared.present(toPresent, from: presentingViewController, animated: animated)
     }
 }
 
@@ -267,21 +348,23 @@ extension FinancialConnectionsSheet: HostControllerDelegate {
     func hostController(
         _ hostController: HostController,
         viewController: UIViewController,
-        didFinish result: HostControllerResult
+        didFinish result: HostControllerResult,
+        linkAccountSessionId: String?
     ) {
         viewController.dismiss(
             animated: true,
             completion: {
+                let flowResult = HostControllerOutcome(result: result, sessionId: linkAccountSessionId)
                 if let wrapperViewController = self.wrapperViewController {
                     wrapperViewController.dismiss(
                         animated: false,
                         completion: {
-                            self.completion?(result)
+                            self.completion?(flowResult)
                         }
                     )
                     self.wrapperViewController = nil
                 } else {
-                    self.completion?(result)
+                    self.completion?(flowResult)
                 }
             }
         )

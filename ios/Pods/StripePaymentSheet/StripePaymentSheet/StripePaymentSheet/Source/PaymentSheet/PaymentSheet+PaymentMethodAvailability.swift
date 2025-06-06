@@ -35,11 +35,18 @@ extension PaymentSheet {
         .sunbit,
         .billie,
         .satispay,
+        .crypto,
         .boleto,
         .swish,
         .twint,
         .multibanco,
     ]
+
+    /// A list of `STPPaymentMethodType` that can be saved in PaymentSheet
+    static let supportedSavedPaymentMethods: [STPPaymentMethodType] = [.card, .USBankAccount, .SEPADebit, .link]
+
+    /// A list of `STPPaymentMethodType` that can be set as default in PaymentSheet when opted in to the "set as default" feature
+    static let supportedDefaultPaymentMethods: [STPPaymentMethodType] = [.card, .USBankAccount]
 
     /// Canonical source of truth for whether Apple Pay is enabled
     static func isApplePayEnabled(elementsSession: STPElementsSession, configuration: PaymentElementConfiguration) -> Bool {
@@ -50,10 +57,20 @@ extension PaymentSheet {
 
     /// Canonical source of truth for whether Link is enabled
     static func isLinkEnabled(elementsSession: STPElementsSession, configuration: PaymentElementConfiguration) -> Bool {
-        guard elementsSession.supportsLink else {
+        guard elementsSession.supportsLink, configuration.link.shouldDisplay else {
             return false
         }
-        return !configuration.requiresBillingDetailCollection()
+
+        // Disable Link web if the merchant is using card brand filtering
+        guard configuration.cardBrandAcceptance == .all || deviceCanUseNativeLink(elementsSession: elementsSession, configuration: configuration) else {
+           return false
+        }
+
+        guard elementsSession.isCompatible(with: configuration) else {
+            return false
+        }
+
+        return true
     }
 
     /// An unordered list of paymentMethodTypes that can be used with Link in PaymentSheet
@@ -61,6 +78,14 @@ extension PaymentSheet {
     ///
     /// :nodoc:
     internal static var supportedLinkPaymentMethods: [STPPaymentMethodType] = []
+}
+
+private extension STPElementsSession {
+    func isCompatible(with configuration: PaymentElementConfiguration) -> Bool {
+        // We can't collect billing details if we're in the web flow, so turn Link off for those cases.
+        let nativeLink = deviceCanUseNativeLink(elementsSession: self, configuration: configuration)
+        return nativeLink || !configuration.requiresBillingDetailCollection()
+    }
 }
 
 // MARK: - PaymentMethodRequirementProvider

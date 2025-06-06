@@ -18,6 +18,10 @@ extension STPElementsSession {
         linkSettings?.passthroughModeEnabled ?? false
     }
 
+    var linkCardBrandFilteringEnabled: Bool {
+        linkPassthroughModeEnabled
+    }
+
     var supportsLinkCard: Bool {
         supportsLink && (linkFundingSources?.contains(.card) ?? false) || linkPassthroughModeEnabled
     }
@@ -38,11 +42,11 @@ extension STPElementsSession {
         linkSettings?.popupWebviewOption ?? .shared
     }
 
-    func shouldShowLink2FABeforePaymentSheet(for linkAccount: PaymentSheetLinkAccount, configuration: PaymentSheet.Configuration) -> Bool {
-        return configuration.forceNativeLinkEnabled &&
-        self.supportsLink &&
+    func shouldShowLink2FABeforePaymentSheet(for linkAccount: PaymentSheetLinkAccount) -> Bool {
+        return self.supportsLink &&
         linkAccount.sessionState == .requiresVerification &&
         !linkAccount.hasStartedSMSVerification &&
+        linkAccount.useMobileEndpoints &&
         self.linkSettings?.suppress2FAModal != true
     }
 
@@ -69,7 +73,7 @@ extension Intent {
             return .setup
         case .deferredIntent(let intentConfig):
             switch intentConfig.mode {
-            case .payment(let amount, let currency, _, _):
+            case .payment(let amount, let currency, _, _, _):
                 return .pay(amount: amount, currency: currency)
             case .setup:
                 return .setup

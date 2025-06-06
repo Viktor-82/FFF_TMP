@@ -10,12 +10,13 @@ import Foundation
 
 protocol NativeFlowDataManager: AnyObject {
     var manifest: FinancialConnectionsSessionManifest { get set }
+    var configuration: FinancialConnectionsSheet.Configuration { get }
     var reducedBranding: Bool { get }
     var merchantLogo: [String]? { get }
     var returnURL: String? { get }
     var consentPaneModel: FinancialConnectionsConsent? { get }
     var accountPickerPane: FinancialConnectionsAccountPickerPane? { get }
-    var apiClient: FinancialConnectionsAPIClient { get }
+    var apiClient: any FinancialConnectionsAPI { get }
     var clientSecret: String { get }
     var analyticsClient: FinancialConnectionsAnalyticsClient { get }
     var elementsSessionContext: ElementsSessionContext? { get }
@@ -23,6 +24,7 @@ protocol NativeFlowDataManager: AnyObject {
 
     var institution: FinancialConnectionsInstitution? { get set }
     var authSession: FinancialConnectionsAuthSession? { get set }
+    var idConsentContent: FinancialConnectionsIDConsentContent? { get set }
     var linkedAccounts: [FinancialConnectionsPartnerAccount]? { get set }
     var terminalError: Error? { get set }
     var errorPaneError: Error? { get set }
@@ -35,6 +37,7 @@ protocol NativeFlowDataManager: AnyObject {
     var lastPaneLaunched: FinancialConnectionsSessionManifest.NextPane? { get set }
     var customSuccessPaneCaption: String? { get set }
     var customSuccessPaneSubCaption: String? { get set }
+    var pendingRelinkAuthorization: String? { get set }
 
     func createPaymentDetails(
         consumerSessionClientSecret: String,
@@ -76,10 +79,12 @@ class NativeFlowAPIDataManager: NativeFlowDataManager {
     var reduceManualEntryProminenceInErrors: Bool {
         return visualUpdate.reduceManualEntryProminenceInErrors
     }
+    let configuration: FinancialConnectionsSheet.Configuration
     let returnURL: String?
     let consentPaneModel: FinancialConnectionsConsent?
+    var idConsentContent: FinancialConnectionsIDConsentContent?
     let accountPickerPane: FinancialConnectionsAccountPickerPane?
-    let apiClient: FinancialConnectionsAPIClient
+    var apiClient: any FinancialConnectionsAPI
     let clientSecret: String
     let analyticsClient: FinancialConnectionsAnalyticsClient
     let elementsSessionContext: ElementsSessionContext?
@@ -96,6 +101,7 @@ class NativeFlowAPIDataManager: NativeFlowDataManager {
     var lastPaneLaunched: FinancialConnectionsSessionManifest.NextPane?
     var customSuccessPaneCaption: String?
     var customSuccessPaneSubCaption: String?
+    var pendingRelinkAuthorization: String?
 
     var consumerSession: ConsumerSessionData? {
         didSet {
@@ -111,16 +117,18 @@ class NativeFlowAPIDataManager: NativeFlowDataManager {
 
     init(
         manifest: FinancialConnectionsSessionManifest,
+        configuration: FinancialConnectionsSheet.Configuration,
         visualUpdate: FinancialConnectionsSynchronize.VisualUpdate,
         returnURL: String?,
         consentPaneModel: FinancialConnectionsConsent?,
         accountPickerPane: FinancialConnectionsAccountPickerPane?,
-        apiClient: FinancialConnectionsAPIClient,
+        apiClient: any FinancialConnectionsAPI,
         clientSecret: String,
         analyticsClient: FinancialConnectionsAnalyticsClient,
         elementsSessionContext: ElementsSessionContext?
     ) {
         self.manifest = manifest
+        self.configuration = configuration
         self.visualUpdate = visualUpdate
         self.returnURL = returnURL
         self.consentPaneModel = consentPaneModel

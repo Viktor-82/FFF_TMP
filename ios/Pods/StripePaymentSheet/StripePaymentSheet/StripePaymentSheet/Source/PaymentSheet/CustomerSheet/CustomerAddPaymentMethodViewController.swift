@@ -243,6 +243,7 @@ class CustomerAddPaymentMethodViewController: UIViewController {
             addressSpecProvider: .shared,
             showLinkInlineCardSignup: false,
             linkAccount: nil,
+            accountService: nil,
             cardBrandChoiceEligible: cbcEligible,
             isPaymentIntent: false,
             isSettingUp: true,
@@ -284,7 +285,14 @@ extension CustomerAddPaymentMethodViewController {
             with: name,
             email: email
         )
-        let client = STPBankAccountCollector()
+        let bankAccountCollectorStyle: STPBankAccountCollectorUserInterfaceStyle = {
+            switch configuration.style {
+            case .automatic: return .automatic
+            case .alwaysLight: return .alwaysLight
+            case .alwaysDark: return .alwaysDark
+            }
+        }()
+        let client = STPBankAccountCollector(style: bankAccountCollectorStyle)
         let errorText = STPLocalizedString(
             "Something went wrong when linking your account.\nPlease try again later.",
             "Error message when an error case happens when linking your account"

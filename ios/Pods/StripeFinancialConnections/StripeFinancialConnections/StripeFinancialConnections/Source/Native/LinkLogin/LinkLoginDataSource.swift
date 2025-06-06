@@ -14,7 +14,7 @@ protocol LinkLoginDataSource: AnyObject {
     var analyticsClient: FinancialConnectionsAnalyticsClient { get }
 
     func synchronize() -> Future<FinancialConnectionsLinkLoginPane>
-    func lookup(emailAddress: String) -> Future<LookupConsumerSessionResponse>
+    func lookup(emailAddress: String, manuallyEntered: Bool) -> Future<LookupConsumerSessionResponse>
     func signUp(
         emailAddress: String,
         phoneNumber: String,
@@ -23,6 +23,10 @@ protocol LinkLoginDataSource: AnyObject {
     func attachToAccountAndSynchronize(
         with linkSignUpResponse: LinkSignUpResponse
     ) -> Future<FinancialConnectionsSynchronize>
+    func completeAssertionIfNeeded(
+        possibleError: Error?,
+        api: FinancialConnectionsAPIClientLogger.API
+    ) -> Error?
 }
 
 final class LinkLoginDataSourceImplementation: LinkLoginDataSource {
@@ -34,14 +38,14 @@ final class LinkLoginDataSourceImplementation: LinkLoginDataSource {
 
     private let clientSecret: String
     private let returnURL: String?
-    private let apiClient: FinancialConnectionsAPIClient
+    private let apiClient: any FinancialConnectionsAPI
 
     init(
         manifest: FinancialConnectionsSessionManifest,
         analyticsClient: FinancialConnectionsAnalyticsClient,
         clientSecret: String,
         returnURL: String?,
-        apiClient: FinancialConnectionsAPIClient,
+        apiClient: any FinancialConnectionsAPI,
         elementsSessionContext: ElementsSessionContext?
     ) {
         self.manifest = manifest
@@ -55,7 +59,8 @@ final class LinkLoginDataSourceImplementation: LinkLoginDataSource {
     func synchronize() -> Future<FinancialConnectionsLinkLoginPane> {
         apiClient.synchronize(
             clientSecret: clientSecret,
-            returnURL: returnURL
+            returnURL: returnURL,
+            initialSynchronize: false
         )
         .chained { synchronize in
             if let linkLoginPane = synchronize.text?.linkLoginPane {
@@ -66,8 +71,15 @@ final class LinkLoginDataSourceImplementation: LinkLoginDataSource {
         }
     }
 
-    func lookup(emailAddress: String) -> Future<LookupConsumerSessionResponse> {
-        return apiClient.consumerSessionLookup(emailAddress: emailAddress, clientSecret: clientSecret)
+    func lookup(emailAddress: String, manuallyEntered: Bool) -> Future<LookupConsumerSessionResponse> {
+        return apiClient.consumerSessionLookup(
+            emailAddress: emailAddress,
+            clientSecret: clientSecret,
+            sessionId: manifest.id,
+            emailSource: manuallyEntered ? .userAction : .customerObject,
+            useMobileEndpoints: manifest.verified,
+            pane: .linkLogin
+        )
     }
 
     func signUp(
@@ -75,13 +87,15 @@ final class LinkLoginDataSourceImplementation: LinkLoginDataSource {
         phoneNumber: String,
         country: String
     ) -> Future<LinkSignUpResponse> {
-        apiClient.linkAccountSignUp(
+        return apiClient.linkAccountSignUp(
             emailAddress: emailAddress,
             phoneNumber: phoneNumber,
             country: country,
             amount: elementsSessionContext?.amount,
             currency: elementsSessionContext?.currency,
-            incentiveEligibilitySession: elementsSessionContext?.incentiveEligibilitySession
+            incentiveEligibilitySession: elementsSessionContext?.incentiveEligibilitySession,
+            useMobileEndpoints: manifest.verified,
+            pane: .linkLogin
         )
     }
 
@@ -99,7 +113,8 @@ final class LinkLoginDataSourceImplementation: LinkLoginDataSource {
 
             return apiClient.synchronize(
                 clientSecret: self.clientSecret,
-                returnURL: self.returnURL
+                returnURL: self.returnURL,
+                initialSynchronize: false
             )
         }
     }
@@ -111,6 +126,19 @@ final class LinkLoginDataSourceImplementation: LinkLoginDataSource {
         apiClient.attachLinkConsumerToLinkAccountSession(
             linkAccountSession: linkAccountSession,
             consumerSessionClientSecret: consumerSessionClientSecret
+        )
+    }
+
+    // Marks the assertion as completed and logs possible errors during verified flows.
+    func completeAssertionIfNeeded(
+        possibleError: Error?,
+        api: FinancialConnectionsAPIClientLogger.API
+    ) -> Error? {
+        guard manifest.verified else { return nil }
+        return apiClient.completeAssertion(
+            possibleError: possibleError,
+            api: api,
+            pane: .linkLogin
         )
     }
 }

@@ -18,6 +18,8 @@
 
 "Add your payment information" = "Legg til betalingsinformasjonen din";
 
+"Agree and continue" = "Godta og hald fram";
+
 "Approve payment" = "Godkjenn betaling";
 
 "Are you sure you want to remove this card?" = "Er du sikker på at du vil slette dette kortet?";
@@ -32,9 +34,11 @@
 
 "Bank account details cannot be changed." = "Bankkontodetaljar kan ikkje endrast.";
 
-"Buy now or pay later with <img/>" = "Kjøp no eller betal seinare med <img/>";
+"Buy now or pay later with  <img/>" = "Kjøp no eller betal seinare med  <img/>";
 
 "Buy now or pay later with Afterpay" = "Kjøp no eller betal seinare med Afterpay";
+
+"Buy now or pay later with Cash App Afterpay" = "Kjøp no eller betal seinare med Cash App Afterpay";
 
 "Buy now or pay later with Clearpay" = "Kjøp no eller betal seinare med Clearpay";
 
@@ -51,6 +55,8 @@
 "By continuing to PayPal, you allow %@ to charge your PayPal account for future payments in accordance with their terms." = "Ved å gå vidare til PayPal gir du %@ tillating til å trekkje framtidige betalingar frå PayPal-kontoen din i samsvar med vilkåra deira.";
 
 "By continuing to Revolut Pay, you allow %@ to charge your Revolut Pay account for future payments in accordance with their terms." = "Ved å gå vidare til Revolut Pay tillet du at %@ trekk framtidige betalingar frå Revolut Pay-kontoen din i samsvar med vilkåra deira.";
+
+"By continuing you agree to the <terms>Terms</terms> and <privacy>Privacy Policy</privacy>." = "Ved å halde fram godtek du <terms>Vilkåra</terms> og <privacy>Personvernerklæringa</privacy>.";
 
 "By continuing, you agree to authorize payments pursuant to <terms>these terms</terms>." = "Ved å halde fram godtek du å autorisere betalingar i samsvar med desse <terms>vilkåra</terms>.";
 
@@ -76,7 +82,7 @@
 
 "Card details cannot be changed." = "Kortdetaljar kan ikkje endrast.";
 
-"Change email" = "Endre e-post";
+"Change" = "Endre";
 
 "Choose a payment method" = "Vel ein betalingsmåte";
 
@@ -86,6 +92,10 @@
 
 "Confirm" = "Stadfest";
 
+"Confirm it's you" = "Stadfest at det er deg";
+
+"Confirm payment details" = "Stadfest betalingsopplysningar";
+
 "Confirm the payment in your bank or payment app within %@ to complete the purchase." = "Stadfest betalinga i banken eller betalingsappen innan %@ for å fullføre kjøpet.";
 
 "Confirm the payment in your bank's app within %@ to complete the purchase." = "Stadfest betalinga i bankappen innan %@ for å fullføre kjøpet.";
@@ -94,25 +104,33 @@
 
 "Contact information" = "Kontaktopplysningar";
 
+"Continue another way" = "Hald fram på ein annan måte";
+
 "Default" = "Standard";
+
+"Default payment method" = "Standard betalingsmetode";
 
 "EPS Bank" = "EPS Bank";
 
 "Enter address manually" = "Skriv inn adresse manuelt";
 
-"Enter the code sent to %@ to use Link to pay by default." = "Legg inn koden som blei send til %@ Link for å betale med standard.";
-
-"Enter your verification code" = "Legg inn verifiseringskoden din";
+"Enter the code sent to %@ to use your saved information." = "Skriv inn koden sendt til %@ for å bruke den lagra informasjonen.";
 
 "FPX Bank" = "FPX-bank";
 
+"Failed to connect" = "Kunne ikkje kople til";
+
+"Fast, secure, 1⁠-⁠click checkout" = "Rask, sikker 1-klikks betaling";
+
 "For security, please re-enter your card’s security code." = "For sikkerhet, vær venleg å leggje inn sikkerhetskoden til kortet ditt.";
+
+"Get %@ back when you pay for the first time with your bank. <terms>See terms</terms>" = "Få %@ tilbake når du betaler for første gong med banken din. <terms>Sjå vilkår</terms>";
+
+"Get %@ back when you pay with your bank. <terms>See terms</terms>" = "Få %@ tilbake når du betaler for første gong med banken din. <terms>Sjå vilkår</terms>";
 
 "I understand that Stripe will be collecting Direct Debits on behalf of %@ and confirm that I am the account holder and the only person required to authorise debits from this account." = "Eg forstår at Stripe samlar inn direkte debet på vegne av %@ og stadfestar at eg er kontoinnehavar og den einaste personen som skal autorisere debet frå denne kontoen.";
 
 "IBAN" = "IBAN";
-
-"Join Link" = "Kople på lenka";
 
 "Log out of Link" = "Logg ut av Link";
 
@@ -121,6 +139,8 @@
 "Manage US bank account" = "Handsam bankkonto i USA";
 
 "Manage card" = "Handsam kort";
+
+"Manage cards" = "Handsam kort";
 
 "Manage payment method" = "Handsam betalingsmetode";
 
@@ -134,7 +154,7 @@
 
 "New payment method" = "Ny betalingsmåte";
 
-"Not %@?" = "Ikkje %@?";
+"No %@ promo" = "Ingen %@-kampanje";
 
 "Only card brand can be changed." = "Berre kortdetaljar kan ikkje endrast.";
 
@@ -170,6 +190,8 @@
 
 "Payment methods" = "Betalingsmetodar";
 
+"Please choose a valid payment method." = "Vel ein gyldig betalingsmåte.";
+
 "Please go back and select another payment method" = "Gå tilbake og vel ei anna betalingsmåte";
 
 "Point the camera at your card." = "Rett kameraet mot kortet.";
@@ -202,9 +224,9 @@
 
 "Save your info for secure 1-click checkout with Link" = "Lagre informasjonen din for sikker betaling med 1 klikk med Link";
 
-"Saved" = "Lagra";
+"Save your payment information with Link, and securely check out in 1-click on Link-supported sites." = "Lagre betalingsinformasjonen din med Link og betal sikkert med 1 klikk på nettstader som støttar Link.";
 
-"Secure 1⁠-⁠click checkout" = "Sikker 1-klikk betaling";
+"Saved" = "Lagra";
 
 "Select card" = "Vel kort";
 
@@ -221,8 +243,6 @@
 "Shipping to %@ is not supported." = "Levering til %@ er ikkje støtta.";
 
 "Show menu" = "Vis meny";
-
-"Sign in to your Link account" = "Logg inn på Link-kontoen din";
 
 "Simple, secure one-click payments" = "Enkle, trygge betalingar med eitt klikk";
 

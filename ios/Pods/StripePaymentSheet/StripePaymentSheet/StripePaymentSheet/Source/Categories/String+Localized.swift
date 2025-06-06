@@ -26,6 +26,13 @@ extension String.Localized {
         )
     }
 
+    static var continue_another_way: String {
+        STPLocalizedString(
+            "Continue another way",
+            "Label of a button that when tapped allows the user to select a different form of payment."
+        )
+    }
+
     static func pay_faster_at_$merchant_and_thousands_of_merchants(merchantDisplayName: String) -> String {
         String(
             format: STPLocalizedString(
@@ -38,6 +45,15 @@ extension String.Localized {
             ),
             merchantDisplayName
         )
+    }
+
+    static var save_your_payment_information_with_link: String {
+        STPLocalizedString(
+                "Save your payment information with Link, and securely check out in 1-click on Link-supported sites.",
+                """
+                Label describing the benefit of signing up for Link.
+                """
+                )
     }
 
     static var save_for_future_payments: String {
@@ -98,6 +114,13 @@ extension String.Localized {
         )
     }
 
+    static var manage_cards: String {
+        STPLocalizedString(
+            "Manage cards",
+            "Title shown above a view containing a list of the customer's cards that they can delete or update"
+        )
+    }
+
     static var bank_account_details_cannot_be_changed: String {
         STPLocalizedString(
             "Bank account details cannot be changed.",
@@ -139,6 +162,16 @@ extension String.Localized {
             """
             Title for a button that when tapped, presents a screen for updating a card. Also
             the heading the screen itself.
+            """
+        )
+    }
+
+    static var confirm_payment_details: String {
+        STPLocalizedString(
+            "Confirm payment details",
+            """
+            Title of a screen where the user can update their payment method before continuing
+            with the transaction.
             """
         )
     }
@@ -384,6 +417,13 @@ extension String.Localized {
         )
     }
 
+    static var buy_now_or_pay_later_with_cash_app_afterpay: String {
+        STPLocalizedString(
+            "Buy now or pay later with Cash App Afterpay",
+            "Subtitle shown on a button allowing a user to select to pay with Afterpay."
+        )
+    }
+
     static var buy_now_or_pay_later_with_afterpay: String {
         STPLocalizedString(
             "Buy now or pay later with Afterpay",
@@ -412,6 +452,13 @@ extension String.Localized {
         )
     }
 
+    static var save_this_account_for_future_payments: String {
+        STPLocalizedString(
+            "Save this account for future %@ payments",
+            "Prompt next to checkbox to save bank account."
+        )
+    }
+
     static var by_providing_your_card_information_text: String {
         STPLocalizedString(
             "By providing your card information, you allow %@ to charge your card for future payments in accordance with their terms.",
@@ -436,5 +483,40 @@ extension String.Localized {
             "Pay over time with Affirm",
             "Promotional text for Affirm, displayed in a button that lets the customer pay with Affirm"
         )
+    }
+
+    static var default_text: String {
+        STPLocalizedString(
+            "Default",
+            "Label for identifying the default payment method."
+       )
+    }
+
+    static var default_payment_method: String {
+        STPLocalizedString(
+            "Default payment method",
+            "Label for a disabled checked checkbox identifying the default payment method."
+       )
+    }
+
+    static var set_as_default_payment_method: String {
+        STPLocalizedString(
+            "Set as default payment method",
+            "Label of a checkbox that when checked makes a payment method as the default one."
+        )
+    }
+
+    static var change: String {
+        STPLocalizedString(
+            "Change",
+            "Label for a button that lets you change the details of a payment method"
+       )
+    }
+
+    static var please_choose_a_valid_payment_method: String {
+        STPLocalizedString(
+            "Please choose a valid payment method.",
+            "Error message that's displayed when you try to confirm a payment without a valid payment method"
+       )
     }
 }

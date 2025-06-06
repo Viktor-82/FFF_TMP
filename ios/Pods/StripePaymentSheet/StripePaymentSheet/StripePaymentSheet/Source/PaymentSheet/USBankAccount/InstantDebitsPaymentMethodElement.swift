@@ -23,16 +23,21 @@ final class InstantDebitsPaymentMethodElement: ContainerElement {
     let emailElement: TextFieldElement?
     let phoneElement: PhoneNumberElement?
     let addressElement: AddressSectionElement?
+    private let promoDisclaimerElement: StaticElement?
 
     private var linkedBankElements: [Element] {
         return [linkedBankInfoSectionElement]
     }
     private let linkedBankInfoSectionElement: SectionElement
     private let linkedBankInfoView: BankAccountInfoView
-    private var linkedBank: InstantDebitsLinkedBank?
+    private var linkedBank: InstantDebitsLinkedBank? {
+        didSet {
+            renderLinkedBank(linkedBank)
+        }
+    }
     private let theme: ElementsAppearance
     var presentingViewControllerDelegate: PresentingViewControllerDelegate?
-    var incentive: PaymentMethodIncentive?
+    private let incentive: PaymentMethodIncentive?
 
     var delegate: ElementDelegate?
     var view: UIView {
@@ -165,19 +170,34 @@ final class InstantDebitsPaymentMethodElement: ContainerElement {
         return nameValid && emailValid && phoneValid && addressValid
     }
 
+    var displayableIncentive: PaymentMethodIncentive? {
+        // We can show the incentive if we haven't linked a bank yet, meaning
+        // that we have no indication that the session is ineligible.
+        let canShowIncentive = linkedBank?.incentiveEligible ?? true
+        return canShowIncentive ? incentive : nil
+    }
+
+    var showIncentiveInHeader: Bool {
+        // Only show the incentive if the user hasn't linked a bank account yet. If they have,
+        // the incentive will be shown in the bank form instead.
+        linkedBank == nil
+    }
+
     init(
         configuration: PaymentSheetFormFactoryConfig,
-        titleElement: StaticElement?,
+        subtitleElement: SubtitleElement?,
         nameElement: PaymentMethodElementWrapper<TextFieldElement>?,
         emailElement: PaymentMethodElementWrapper<TextFieldElement>?,
         phoneElement: PaymentMethodElementWrapper<PhoneNumberElement>?,
         addressElement: PaymentMethodElementWrapper<AddressSectionElement>?,
         incentive: PaymentMethodIncentive?,
         isPaymentIntent: Bool,
-        theme: ElementsAppearance = .default
+        appearance: PaymentSheet.Appearance = .default
     ) {
+        let theme = appearance.asElementsTheme
+
         self.configuration = configuration
-        self.linkedBankInfoView = BankAccountInfoView(frame: .zero, theme: theme)
+        self.linkedBankInfoView = BankAccountInfoView(frame: .zero, appearance: appearance, incentive: incentive)
         self.linkedBankInfoSectionElement = SectionElement(
             title: String.Localized.bank_account_sentence_case,
             elements: [StaticElement(view: linkedBankInfoView)],
@@ -193,8 +213,7 @@ final class InstantDebitsPaymentMethodElement: ContainerElement {
         self.linkedBankInfoSectionElement.view.isHidden = true
         self.incentive = incentive
         self.theme = theme
-        
-        let promoDisclaimerElement = incentive.flatMap {
+        self.promoDisclaimerElement = incentive.flatMap {
             let label = ElementsUI.makeNoticeTextField(theme: theme)
             label.attributedText = $0.promoDisclaimerText(with: theme, isPaymentIntent: isPaymentIntent)
             label.textContainerInset = .zero
@@ -203,7 +222,7 @@ final class InstantDebitsPaymentMethodElement: ContainerElement {
         }
 
         let allElements: [Element?] = [
-            titleElement,
+            subtitleElement,
             nameElement,
             emailElement,
             phoneElement,
@@ -222,19 +241,30 @@ final class InstantDebitsPaymentMethodElement: ContainerElement {
 
     func setLinkedBank(_ linkedBank: InstantDebitsLinkedBank) {
         self.linkedBank = linkedBank
-        if
-            let last4ofBankAccount = linkedBank.last4,
-            let bankName = linkedBank.bankName
-        {
+        self.delegate?.didUpdate(element: self)
+    }
+
+    fileprivate func renderLinkedBank(_ linkedBank: InstantDebitsLinkedBank?) {
+        if let linkedBank, let last4ofBankAccount = linkedBank.last4, let bankName = linkedBank.bankName {
             linkedBankInfoView.setBankName(text: bankName)
             linkedBankInfoView.setLastFourOfBank(text: "••••\(last4ofBankAccount)")
+            linkedBankInfoView.setIncentiveEligible(linkedBank.incentiveEligible)
+        }
+
+        formElement.toggleElements(
+            linkedBankElements,
+            hidden: linkedBank == nil,
+            animated: true
+        )
+
+        if let promoDisclaimerElement {
+            let hideDisclaimer = incentive == nil || linkedBank?.incentiveEligible == false
             formElement.toggleElements(
-                linkedBankElements,
-                hidden: false,
+                [promoDisclaimerElement],
+                hidden: hideDisclaimer,
                 animated: true
             )
         }
-        self.delegate?.didUpdate(element: self)
     }
 
     func getLinkedBank() -> InstantDebitsLinkedBank? {
@@ -248,11 +278,6 @@ extension InstantDebitsPaymentMethodElement: BankAccountInfoViewDelegate {
 
     func didTapXIcon() {
         let hideLinkedBankElement = {
-            self.formElement.toggleElements(
-                self.linkedBankElements,
-                hidden: true,
-                animated: true
-            )
             self.linkedBank = nil
             self.delegate?.didUpdate(element: self)
         }
@@ -334,7 +359,7 @@ private extension PaymentSheet.Address {
 }
 
 private extension PaymentMethodIncentive {
-    
+
     func promoDisclaimerText(
         with appearance: ElementsAppearance,
         isPaymentIntent: Bool
@@ -350,15 +375,15 @@ private extension PaymentMethodIncentive {
                 "Disclaimer for when a promotion is available for setting up a bank account. e.g. 'Get $5 back when […]'"
             )
         }
-        
+
         let string = String(format: baseString, displayText)
-        
+
         let links = [
             "terms": URL(string: "https://link.com/promotion-terms")!,
         ]
-        
+
         let formattedString = STPStringUtils.applyLinksToString(template: string, links: links)
-        
+
         let style = NSMutableParagraphStyle()
         style.alignment = .left
         formattedString.addAttributes(

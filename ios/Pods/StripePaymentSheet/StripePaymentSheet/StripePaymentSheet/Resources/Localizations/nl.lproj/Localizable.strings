@@ -18,6 +18,8 @@
 
 "Add your payment information" = "Je betaalgegevens toevoegen";
 
+"Agree and continue" = "Akkoord en doorgaan";
+
 "Approve payment" = "Betaling goedkeuren";
 
 "Are you sure you want to remove this card?" = "Weet je zeker dat je deze betaalkaart wilt verwijderen?";
@@ -32,9 +34,11 @@
 
 "Bank account details cannot be changed." = "Bankrekeninggegevens kunnen niet worden gewijzigd.";
 
-"Buy now or pay later with <img/>" = "Koop nu of betaal later met <img/>";
+"Buy now or pay later with  <img/>" = "Koop nu of betaal later met <img/>";
 
 "Buy now or pay later with Afterpay" = "Koop nu of betaal later met Afterpay";
+
+"Buy now or pay later with Cash App Afterpay" = "Koop nu of betaal later met Cash App Afterpay";
 
 "Buy now or pay later with Clearpay" = "Koop nu of betaal later met Clearpay";
 
@@ -52,13 +56,15 @@
 
 "By continuing to Revolut Pay, you allow %@ to charge your Revolut Pay account for future payments in accordance with their terms." = "Als je doorgaat naar Revolut Pay, geef je %@ toestemming om toekomstige betalingen in rekening te brengen op je Revolut Pay-account in overeenstemming met hun voorwaarden.";
 
+"By continuing you agree to the <terms>Terms</terms> and <privacy>Privacy Policy</privacy>." = "Als je doorgaat, ga je akkoord met de <terms>voorwaarden</terms> en het <privacy>privacybeleid</privacy>.";
+
 "By continuing, you agree to authorize payments pursuant to <terms>these terms</terms>." = "Als je doorgaat, ga je ermee akkoord betalingen in overeenstemming met <terms>deze voorwaarden</terms> te autoriseren.";
 
 "By continuing, you authorize %@ to debit your Cash App account for this payment and future payments in accordance with %@'s terms, until this authorization is revoked. You can change this anytime in your Cash App Settings." = "Als je doorgaat, geef je %1$@ toestemming om deze betaling en toekomstige betalingen in rekening te brengen op je Cash App-account, in overeenstemming met de voorwaarden van %2$@, totdat je deze toestemming intrekt. Je kunt dit op elk moment wijzigen via je Cash App-instellingen.";
 
 "By joining Link, you agree to the <terms>Terms</terms> and <privacy>Privacy Policy</privacy>." = "Door Link te gebruiken ga je akkoord met de <terms>voorwaarden</terms> en het <privacy>privacybeleid</privacy>.";
 
-"By providing your bank account details and confirming this payment, you agree to this Direct Debit Request and the <terms>Direct Debit Request service agreement</terms>, and authorise Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID number 507156 (“Stripe”) to debit your account through the Bulk Electronic Clearing System (BECS) on behalf of %@ (the \"Merchant\") for any amounts separately communicated to you by the Merchant. You certify that you are either an account holder or an authorised signatory on the account listed above." = "Door je bankrekeninggegevens te verstrekken en deze betaling te bevestigen ga je akkoord met deze aanvraag voor automatische incasso en de <terms>Direct Debit Request-serviceovereenkomst</terms>, en autoriseer je Stripe Payments Australia Pty Ltd ACN 160 180 343 met gebruikers-ID voor automatische incasso's 507156 (“Stripe”) om bedragen van je rekening af te schrijven via het BECS-systeem (Bulk Electronic Clearing System) namens %@ (de \"Verkoper\") voor bedragen die afzonderlijk door de verkoper aan je kenbaar worden gemaakt. Je verklaart dat je de rekeninghouder bent van of bevoegd bent om te tekenen voor de hierboven vermelde rekening.";
+"By providing your bank account details and confirming this payment, you agree to this Direct Debit Request and the <terms>Direct Debit Request service agreement</terms>, and authorise Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID number 507156 (“Stripe”) to debit your account through the Bulk Electronic Clearing System (BECS) on behalf of %@ (the \"Merchant\") for any amounts separately communicated to you by the Merchant. You certify that you are either an account holder or an authorised signatory on the account listed above." = "Door je bankrekeninggegevens te verstrekken en deze betaling te bevestigen ga je akkoord met deze aanvraag voor automatische incasso en de <terms>Direct Debit Request-dienstverleningsovereenkomst</terms>, en autoriseer je Stripe Payments Australia Pty Ltd ACN 160 180 343 met gebruikers-ID voor automatische incasso's 507156 (“Stripe”) om bedragen van je rekening af te schrijven via het BECS-systeem (Bulk Electronic Clearing System) namens %@ (de \"Verkoper\") voor bedragen die afzonderlijk door de verkoper aan je kenbaar worden gemaakt. Je verklaart dat je de rekeninghouder bent van of bevoegd bent om te tekenen voor de hierboven vermelde rekening.";
 
 "By providing your card information, you allow %@ to charge your card for future payments in accordance with their terms." = "Door je kaartgegevens te verstrekken geef je %@ toestemming om toekomstige betalingen af te schrijven van je betaalkaart in overeenstemming met hun voorwaarden.";
 
@@ -76,7 +82,7 @@
 
 "Card details cannot be changed." = "Betaalkaartgegevens kunnen niet worden gewijzigd.";
 
-"Change email" = "E-mailadres wijzigen";
+"Change" = "Wijzigen";
 
 "Choose a payment method" = "Een betaalmethode kiezen";
 
@@ -86,6 +92,10 @@
 
 "Confirm" = "Bevestigen";
 
+"Confirm it's you" = "Bevestig dat jij het bent";
+
+"Confirm payment details" = "Betaalgegevens bevestigen";
+
 "Confirm the payment in your bank or payment app within %@ to complete the purchase." = "Bevestig de betaling via je bank of betaal-app binnen %@ om de aankoop af te ronden.";
 
 "Confirm the payment in your bank's app within %@ to complete the purchase." = "Bevestig de betaling in de app van je bank binnen %@ om de aankoop af te ronden.";
@@ -94,25 +104,33 @@
 
 "Contact information" = "Contactgegevens";
 
+"Continue another way" = "Op een andere manier doorgaan";
+
 "Default" = "Standaard";
+
+"Default payment method" = "Standaardbetaalmethode";
 
 "EPS Bank" = "EPS Bank";
 
 "Enter address manually" = "Adres handmatig invoeren";
 
-"Enter the code sent to %@ to use Link to pay by default." = "Voer de code in die is verstuurd naar %@ om standaard met Link te betalen.";
-
-"Enter your verification code" = "Voer je verificatiecode in.";
+"Enter the code sent to %@ to use your saved information." = "Voer de code in die is verzonden naar %@ om je opgeslagen gegevens te gebruiken.";
 
 "FPX Bank" = "FPX Bank";
 
+"Failed to connect" = "Kan geen verbinding maken";
+
+"Fast, secure, 1⁠-⁠click checkout" = "Snel en veilig met één klik afrekenen";
+
 "For security, please re-enter your card’s security code." = "Voer uit veiligheidsoverwegingen de beveiligingscode van je betaalkaart opnieuw in.";
+
+"Get %@ back when you pay for the first time with your bank. <terms>See terms</terms>" = "Krijg %@ terug wanneer je voor de eerste keer via je bank betaalt. <terms>Zie voorwaarden</terms>";
+
+"Get %@ back when you pay with your bank. <terms>See terms</terms>" = "Krijg %@ terug wanneer je via je bank betaalt. <terms>Zie voorwaarden</terms>";
 
 "I understand that Stripe will be collecting Direct Debits on behalf of %@ and confirm that I am the account holder and the only person required to authorise debits from this account." = "Ik begrijp dat Stripe namens %@ bedragen via automatische incasso gaat afschrijven en ik bevestig dat ik als rekeninghouder de enige vereiste persoon ben om afschrijvingen van deze rekening te autoriseren.";
 
 "IBAN" = "IBAN";
-
-"Join Link" = "Aanmelden bij Link";
 
 "Log out of Link" = "Afmelden bij Link";
 
@@ -121,6 +139,8 @@
 "Manage US bank account" = "Amerikaanse bankrekening beheren";
 
 "Manage card" = "Betaalkaart beheren";
+
+"Manage cards" = "Betaalkaarten beheren";
 
 "Manage payment method" = "Betaalmethode beheren";
 
@@ -134,7 +154,7 @@
 
 "New payment method" = "Nieuwe betaalmethode";
 
-"Not %@?" = "Niet %@?";
+"No %@ promo" = "Geen %@-promo";
 
 "Only card brand can be changed." = "Alleen het merk van de betaalkaart kan worden gewijzigd.";
 
@@ -170,6 +190,8 @@
 
 "Payment methods" = "Betaalmethoden";
 
+"Please choose a valid payment method." = "Kies een geldige betaalmethode.";
+
 "Please go back and select another payment method" = "Ga terug en selecteer een andere betaalmethode.";
 
 "Point the camera at your card." = "Richt de camera op de kaart.";
@@ -202,9 +224,9 @@
 
 "Save your info for secure 1-click checkout with Link" = "Bewaar je gegevens zodat je veilig met één klik kunt afrekenen met Link";
 
-"Saved" = "Opgeslagen";
+"Save your payment information with Link, and securely check out in 1-click on Link-supported sites." = "Sla je betaalgegevens op met Link, en je kunt veilig met één klik afrekenen op sites die door Link worden ondersteund.";
 
-"Secure 1⁠-⁠click checkout" = "Veilig afrekenen in één klik";
+"Saved" = "Opgeslagen";
 
 "Select card" = "Betaalkaart selecteren";
 
@@ -221,8 +243,6 @@
 "Shipping to %@ is not supported." = "Verzending naar %@ wordt niet ondersteund.";
 
 "Show menu" = "Menu weergeven";
-
-"Sign in to your Link account" = "Aanmelden bij je Link-account";
 
 "Simple, secure one-click payments" = "Betaal eenvoudig en veilig met één klik";
 

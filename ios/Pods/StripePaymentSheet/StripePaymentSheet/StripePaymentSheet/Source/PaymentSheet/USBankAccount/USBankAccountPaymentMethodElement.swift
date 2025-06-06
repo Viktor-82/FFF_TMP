@@ -37,12 +37,13 @@ final class USBankAccountPaymentMethodElement: ContainerElement {
     private let formElement: FormElement
     private let bankInfoSectionElement: SectionElement
     private let bankInfoView: BankAccountInfoView
-    private let checkboxElement: PaymentMethodElement?
+    private let saveCheckboxElement: PaymentMethodElementWrapper<CheckboxElement>?
+    private let defaultCheckboxElement: Element?
     private var savingAccount: BoolReference
     private let theme: ElementsAppearance
 
     private var linkedAccountElements: [Element] {
-        [bankInfoSectionElement, checkboxElement].compactMap { $0 }
+        [bankInfoSectionElement, saveCheckboxElement, saveCheckboxElement?.element.isSelected ?? false ? defaultCheckboxElement : nil].compactMap { $0 }
     }
 
     private static let links: [String: URL] = [
@@ -82,17 +83,20 @@ final class USBankAccountPaymentMethodElement: ContainerElement {
 
     init(
         configuration: PaymentSheetFormFactoryConfig,
-        titleElement: StaticElement,
+        subtitleElement: SubtitleElement,
         nameElement: PaymentMethodElementWrapper<TextFieldElement>?,
         emailElement: PaymentMethodElementWrapper<TextFieldElement>?,
         phoneElement: PaymentMethodElementWrapper<PhoneNumberElement>?,
         addressElement: PaymentMethodElementWrapper<AddressSectionElement>?,
-        checkboxElement: PaymentMethodElement?,
+        saveCheckboxElement: PaymentMethodElementWrapper<CheckboxElement>?,
+        defaultCheckboxElement: Element?,
         savingAccount: BoolReference,
+        isSettingUp: Bool,
         merchantName: String,
         initialLinkedBank: FinancialConnectionsLinkedBank?,
-        theme: ElementsAppearance = .default
+        appearance: PaymentSheet.Appearance = .default
     ) {
+        let theme = appearance.asElementsTheme
         let collectingName = configuration.billingDetailsCollectionConfiguration.name != .never
         let collectingEmail = configuration.billingDetailsCollectionConfiguration.email != .never
         let hasDefaultName = configuration.billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod
@@ -110,23 +114,26 @@ final class USBankAccountPaymentMethodElement: ContainerElement {
 
         self.configuration = configuration
         self.linkedBank = initialLinkedBank
-        self.bankInfoView = BankAccountInfoView(frame: .zero, theme: theme)
+        self.bankInfoView = BankAccountInfoView(frame: .zero, appearance: appearance)
         self.bankInfoSectionElement = SectionElement(title: String.Localized.bank_account_sentence_case,
                                                      elements: [StaticElement(view: bankInfoView)], theme: theme)
         self.bankInfoSectionElement.view.isHidden = true
-        self.checkboxElement = checkboxElement
-        checkboxElement?.view.isHidden = true
+        self.saveCheckboxElement = saveCheckboxElement
+        saveCheckboxElement?.view.isHidden = true
+        self.defaultCheckboxElement = defaultCheckboxElement
+        defaultCheckboxElement?.view.isHidden = true
         self.merchantName = merchantName
         self.savingAccount = savingAccount
         self.theme = theme
         let allElements: [Element?] = [
-            titleElement,
+            subtitleElement,
             nameElement,
             emailElement,
             phoneElement,
             addressElement,
             bankInfoSectionElement,
-            checkboxElement,
+            saveCheckboxElement,
+            defaultCheckboxElement,
         ]
         let autoSectioningElements = allElements.compactMap { $0 }
         self.formElement = FormElement(autoSectioningElements: autoSectioningElements, theme: theme)
@@ -137,7 +144,7 @@ final class USBankAccountPaymentMethodElement: ContainerElement {
             guard let self = self else {
                 return
             }
-            self.mandateString = Self.attributedMandateText(for: self.linkedBank, merchantName: merchantName, isSaving: value, configuration: configuration, theme: theme)
+            self.mandateString = Self.attributedMandateText(for: self.linkedBank, merchantName: merchantName, isSaving: value || isSettingUp, configuration: configuration, theme: theme)
             self.delegate?.didUpdate(element: self)
         }
         updateLinkedBankUI(animated: false)
@@ -176,7 +183,7 @@ final class USBankAccountPaymentMethodElement: ContainerElement {
         var mandateText = isSaving ? String(format: Self.SaveAccountMandateText, merchantName) : String.Localized.bank_continue_mandate_text
         if case .customerSheet = configuration, !linkedBank.instantlyVerified {
             mandateText =  String.init(format: Self.MicrodepositCopy_CustomerSheet, merchantName) + "\n" + mandateText
-        } else if case .paymentSheet = configuration, !linkedBank.instantlyVerified {
+        } else if case .paymentElement = configuration, !linkedBank.instantlyVerified {
             mandateText =  String.init(format: Self.MicrodepositCopy, merchantName) + "\n" + mandateText
         }
         let formattedString = STPStringUtils.applyLinksToString(template: mandateText, links: links)
@@ -195,7 +202,7 @@ final class USBankAccountPaymentMethodElement: ContainerElement {
         let style = NSMutableParagraphStyle()
         style.alignment = alignment
         formattedString.addAttributes([.paragraphStyle: style,
-                                       .font: UIFont.preferredFont(forTextStyle: .footnote),
+                                       .font: theme.fonts.footnote,
                                        .foregroundColor: theme.colors.secondaryText,
                                       ],
                                       range: NSRange(location: 0, length: formattedString.length))

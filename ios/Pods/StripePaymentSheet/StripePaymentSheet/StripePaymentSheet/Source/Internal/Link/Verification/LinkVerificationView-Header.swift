@@ -32,6 +32,7 @@ extension LinkVerificationView {
             button.setImage(Image.icon_cancel.makeImage(template: true), for: .normal)
             button.translatesAutoresizingMaskIntoConstraints = false
             button.accessibilityLabel = String.Localized.close
+            button.accessibilityIdentifier = "LinkVerificationCloseButton"
             return button
         }()
 
@@ -47,7 +48,7 @@ extension LinkVerificationView {
 
             NSLayoutConstraint.activate([
                 // Logo
-                logoView.centerXAnchor.constraint(equalTo: centerXAnchor),
+                logoView.leadingAnchor.constraint(equalTo: leadingAnchor),
                 logoView.centerYAnchor.constraint(equalTo: centerYAnchor),
                 logoView.heightAnchor.constraint(equalToConstant: Constants.logoHeight),
 

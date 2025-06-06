@@ -37,7 +37,7 @@ final class FinancialConnectionsWebFlowViewController: UIViewController {
     private lazy var continueStateView: UIView = {
         let continueStateViews = ContinueStateViews(
             institutionImageUrl: nil,
-            theme: manifest.theme,
+            appearance: manifest.appearance,
             didSelectContinue: { [weak self] in
                 guard let self else { return }
                 if let url = self.lastOpenedNativeURL {
@@ -65,11 +65,12 @@ final class FinancialConnectionsWebFlowViewController: UIViewController {
     private var lastOpenedNativeURL: URL?
 
     private let clientSecret: String
-    private let apiClient: FinancialConnectionsAPIClient
+    private let apiClient: any FinancialConnectionsAPI
     private let sessionFetcher: FinancialConnectionsSessionFetcher
     private let manifest: FinancialConnectionsSessionManifest
     private let returnURL: String?
     private let elementsSessionContext: ElementsSessionContext?
+    private let prefillDetailsOverride: WebPrefillDetails?
 
     // MARK: - UI
 
@@ -80,23 +81,24 @@ final class FinancialConnectionsWebFlowViewController: UIViewController {
             target: self,
             action: #selector(didTapClose)
         )
-        item.tintColor = .iconDefault
+        item.tintColor = FinancialConnectionsAppearance.Colors.icon
         item.imageInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 5)
         return item
     }()
 
     // Use nil theme so the spinner view doesn't flash to the theme's color before launching the webview.
-    private let loadingView = LoadingView(frame: .zero, theme: nil)
+    private let loadingView = LoadingView(frame: .zero, appearance: nil)
 
     // MARK: - Init
 
     init(
         clientSecret: String,
-        apiClient: FinancialConnectionsAPIClient,
+        apiClient: any FinancialConnectionsAPI,
         manifest: FinancialConnectionsSessionManifest,
         sessionFetcher: FinancialConnectionsSessionFetcher,
         returnURL: String?,
-        elementsSessionContext: ElementsSessionContext?
+        elementsSessionContext: ElementsSessionContext?,
+        prefillDetailsOverride: WebPrefillDetails?
     ) {
         self.clientSecret = clientSecret
         self.apiClient = apiClient
@@ -104,6 +106,7 @@ final class FinancialConnectionsWebFlowViewController: UIViewController {
         self.sessionFetcher = sessionFetcher
         self.returnURL = returnURL
         self.elementsSessionContext = elementsSessionContext
+        self.prefillDetailsOverride = prefillDetailsOverride
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -116,7 +119,7 @@ final class FinancialConnectionsWebFlowViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        view.backgroundColor = .customBackgroundColor
+        view.backgroundColor = FinancialConnectionsAppearance.Colors.background
         navigationItem.rightBarButtonItem = closeItem
         loadingView.tryAgainButton.addTarget(self, action: #selector(didTapTryAgainButton), for: .touchUpInside)
         view.addSubview(loadingView)
@@ -152,18 +155,24 @@ extension FinancialConnectionsWebFlowViewController {
         additionalQueryParameters: String? = nil
     ) {
         guard authSessionManager == nil else { return }
+        guard let hostedAuthUrlString = manifest.hostedAuthUrl, let hostedAuthUrl = URL(string: hostedAuthUrlString) else {
+            let error = FinancialConnectionsSheetError.unknown(debugDescription: "NULL or malformed `hostedAuthUrl`")
+            notifyDelegateOfFailure(error: error)
+            return
+        }
+
         loadingView.showLoading(true)
         authSessionManager = AuthenticationSessionManager(manifest: manifest, window: view.window)
-        let additionalQueryParameters = Self.buildEncodedUrlParameters(
-            startingAdditionalParameters: additionalQueryParameters,
+
+        let updatedHostedAuthUrl = HostedAuthUrlBuilder.build(
+            baseHostedAuthUrl: hostedAuthUrl,
             isInstantDebits: manifest.isProductInstantDebits,
-            linkMode: elementsSessionContext?.linkMode,
-            prefillDetails: elementsSessionContext?.prefillDetails,
-            billingDetails: elementsSessionContext?.billingDetails,
-            incentiveEligibilitySession: elementsSessionContext?.incentiveEligibilitySession
+            elementsSessionContext: elementsSessionContext,
+            prefillDetailsOverride: prefillDetailsOverride,
+            additionalQueryParameters: additionalQueryParameters
         )
         authSessionManager?
-            .start(additionalQueryParameters: additionalQueryParameters)
+            .start(hostedAuthUrl: updatedHostedAuthUrl)
             .observe(using: { [weak self] (result) in
                 guard let self = self else { return }
                 self.loadingView.showLoading(false)
@@ -171,13 +180,10 @@ extension FinancialConnectionsWebFlowViewController {
                 case .success(.success(let returnUrl)):
                     if manifest.isProductInstantDebits {
                         if let paymentMethod = returnUrl.extractLinkBankPaymentMethod() {
-                            let instantDebitsLinkedBank = InstantDebitsLinkedBank(
-                                paymentMethod: paymentMethod,
-                                bankName: returnUrl.extractValue(forKey: "bank_name")?
-                                // backend can return "+" instead of a more-common encoding of "%20" for spaces
-                                    .replacingOccurrences(of: "+", with: " "),
-                                last4: returnUrl.extractValue(forKey: "last4"),
-                                linkMode: elementsSessionContext?.linkMode
+                            let instantDebitsLinkedBank = createInstantDebitsLinkedBank(
+                                from: returnUrl,
+                                with: paymentMethod,
+                                linkAccountSessionId: manifest.id
                             )
                             self.notifyDelegateOfSuccess(result: .instantDebits(instantDebitsLinkedBank))
                         } else {
@@ -209,6 +215,23 @@ extension FinancialConnectionsWebFlowViewController {
                 }
                 self.authSessionManager = nil
             })
+    }
+
+    private func createInstantDebitsLinkedBank(
+        from url: URL,
+        with paymentMethod: LinkBankPaymentMethod,
+        linkAccountSessionId: String
+    ) -> InstantDebitsLinkedBank {
+        return InstantDebitsLinkedBank(
+            paymentMethod: paymentMethod,
+            bankName: url.extractValue(forKey: "bank_name")?
+                // backend can return "+" instead of a more-common encoding of "%20" for spaces
+                .replacingOccurrences(of: "+", with: " "),
+            last4: url.extractValue(forKey: "last4"),
+            linkMode: elementsSessionContext?.linkMode,
+            incentiveEligible: url.extractValue(forKey: "incentive_eligible").flatMap { Bool($0) } ?? false,
+            linkAccountSessionId: linkAccountSessionId
+        )
     }
 
     private func redirect(to url: URL) {
@@ -295,27 +318,27 @@ extension FinancialConnectionsWebFlowViewController {
 }
 
 private extension URL {
-    
+
     /// The URL contains a base64-encoded payment method. We store its values in `LinkBankPaymentMethod` so that
     /// we can parse it back in StripeCore.
     func extractLinkBankPaymentMethod() -> LinkBankPaymentMethod? {
         guard let encodedPaymentMethod = extractValue(forKey: "payment_method") else {
             return nil
         }
-        
+
         guard let data = Data(base64Encoded: encodedPaymentMethod) else {
             return nil
         }
-        
+
         let result: Result<LinkBankPaymentMethod, Error> = STPAPIClient.decodeResponse(
             data: data,
             error: nil,
             response: nil
         )
-        
+
         return try? result.get()
     }
-    
+
     func extractValue(forKey key: String) -> String? {
         guard let components = URLComponents(url: self, resolvingAgainstBaseURL: false) else {
             assertionFailure("Invalid URL")
@@ -442,88 +465,5 @@ private extension FinancialConnectionsWebFlowViewController {
             return startPollingParam
         }
         return startPollingParam + "&\(fragment)"
-    }
-}
-
-extension FinancialConnectionsWebFlowViewController {
-    static func buildEncodedUrlParameters(
-        startingAdditionalParameters: String?,
-        isInstantDebits: Bool,
-        linkMode: LinkMode?,
-        prefillDetails: ElementsSessionContext.PrefillDetails?,
-        billingDetails: ElementsSessionContext.BillingDetails?,
-        incentiveEligibilitySession: ElementsSessionContext.IntentID?
-    ) -> String? {
-        var parameters: [String] = []
-
-        if let startingAdditionalParameters {
-            parameters.append(startingAdditionalParameters)
-        }
-
-        if isInstantDebits {
-            parameters.append("return_payment_method=true")
-            parameters.append("expand_payment_method=true")
-            
-            if let incentiveEligibilitySession {
-                parameters.append("instantDebitsIncentive=true")
-                parameters.append("incentiveEligibilitySession=\(incentiveEligibilitySession.id)")
-            }
-            
-            if let linkMode {
-                parameters.append("link_mode=\(linkMode.rawValue)")
-            }
-
-            if let billingDetails = billingDetails {
-                if let name = billingDetails.name, !name.isEmpty {
-                    parameters.append("billingDetails[name]=\(name)")
-                }
-                if let email = billingDetails.email, !email.isEmpty {
-                    parameters.append("billingDetails[email]=\(email)")
-                }
-                if let phone = billingDetails.phone, !phone.isEmpty {
-                    parameters.append("billingDetails[phone]=\(phone)")
-                }
-                if let address = billingDetails.address {
-                    if let city = address.city, !city.isEmpty {
-                        parameters.append("billingDetails[address][city]=\(city)")
-                    }
-                    if let country = address.country, !country.isEmpty {
-                        parameters.append("billingDetails[address][country]=\(country)")
-                    }
-                    if let line1 = address.line1, !line1.isEmpty {
-                        parameters.append("billingDetails[address][line1]=\(line1)")
-                    }
-                    if let line2 = address.line2, !line2.isEmpty {
-                        parameters.append("billingDetails[address][line2]=\(line2)")
-                    }
-                    if let postalCode = address.postalCode, !postalCode.isEmpty {
-                        parameters.append("billingDetails[address][postal_code]=\(postalCode)")
-                    }
-                    if let state = address.state, !state.isEmpty {
-                        parameters.append("billingDetails[address][state]=\(state)")
-                    }
-                }
-            }
-        }
-
-        if let prefillDetails = prefillDetails {
-            if let email = prefillDetails.email, !email.isEmpty {
-                parameters.append("email=\(email)")
-            }
-            if let phoneNumber = prefillDetails.unformattedPhoneNumber, !phoneNumber.isEmpty {
-                parameters.append("linkMobilePhone=\(phoneNumber)")
-            }
-            if let countryCode = prefillDetails.countryCode, !countryCode.isEmpty {
-                parameters.append("linkMobilePhoneCountry=\(countryCode)")
-            }
-        }
-
-        // Join all values with an &, and URL encode.
-        // We encode these parameters since they will be appended to the auth flow URL.
-        guard let result = parameters.joined(separator: "&").addingPercentEncoding(withAllowedCharacters: .urlHostAllowed) else {
-            return nil
-        }
-        // Start the result with a & if it is not empty and doesn't already start with one.
-        return result.isEmpty ? nil : result.hasPrefix("&") ? result : "&" + result
     }
 }

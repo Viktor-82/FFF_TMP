@@ -16,6 +16,7 @@ extension PaymentOption {
     /// Returns an icon representing the payment option, suitable for display on a checkout screen
     func makeIcon(
         for traitCollection: UITraitCollection? = nil,
+        currency: String?,
         updateImageHandler: DownloadManager.UpdateImageHandler?
     ) -> UIImage {
         switch self {
@@ -28,12 +29,18 @@ extension PaymentOption {
                 return paymentMethod.makeIcon()
             }
         case .new(let confirmParams):
-            return confirmParams.makeIcon(updateImageHandler: updateImageHandler)
-        case .link:
-            return Image.link_logo.makeImage()
+            return confirmParams.makeIcon(currency: currency, updateImageHandler: updateImageHandler)
+        case .link(let linkConfirmOption):
+            switch linkConfirmOption {
+            case .signUp(_, _, _, _, let confirmParams):
+                return confirmParams.makeIcon(currency: currency, updateImageHandler: updateImageHandler)
+            case .wallet, .withPaymentMethod, .withPaymentDetails:
+                return Image.link_logo.makeImage()
+            }
         case .external(let paymentMethod, _):
             return PaymentSheet.PaymentMethodType.external(paymentMethod).makeImage(
                 forDarkBackground: traitCollection?.isDarkMode ?? false,
+                currency: currency,
                 updateHandler: nil
             )
         }
@@ -77,6 +84,12 @@ extension STPPaymentMethod {
             return PaymentSheetImageLibrary.bankIcon(
                 for: PaymentSheetImageLibrary.bankIconCode(for: usBankAccount?.bankName)
             )
+        case .link:
+            if let linkPaymentDetails {
+                return STPImageLibrary.cardBrandImage(for: linkPaymentDetails.brand)
+            } else {
+                return Image.link_logo.makeImage()
+            }
         default:
             // If there's no image specific to this PaymentMethod (eg card network logo, bank logo), default to the PaymentMethod type's icon
             // TODO: This only looks at client-side assets! 
@@ -100,7 +113,11 @@ extension STPPaymentMethod {
         case .SEPADebit:
             return Image.carousel_sepa.makeImage(overrideUserInterfaceStyle: overrideUserInterfaceStyle).withRenderingMode(.alwaysOriginal)
         case .link:
-            return Image.link_logo.makeImage(overrideUserInterfaceStyle: overrideUserInterfaceStyle).withRenderingMode(.alwaysOriginal)
+            if let linkPaymentDetails {
+                return linkPaymentDetails.brand.makeSavedPaymentMethodCellImage(overrideUserInterfaceStyle: overrideUserInterfaceStyle)
+            } else {
+                return Image.link_logo.makeImage(overrideUserInterfaceStyle: overrideUserInterfaceStyle).withRenderingMode(.alwaysOriginal)
+            }
         default:
             assertionFailure("\(type) not supported for saved PMs")
             return makeIcon()
@@ -118,6 +135,9 @@ extension STPPaymentMethod {
             ).rounded(radius: 3)
         case .SEPADebit:
             return Image.pm_type_sepa.makeImage().withRenderingMode(.alwaysOriginal)
+        case .link:
+            let cardBrand = linkPaymentDetails?.brand ?? .unknown
+            return STPImageLibrary.unpaddedCardBrandImage(for: cardBrand)
         default:
             assertionFailure("\(type) not supported for saved PMs")
             return makeIcon()
@@ -126,24 +146,15 @@ extension STPPaymentMethod {
 }
 
  extension STPPaymentMethodParams {
-    func makeIcon(updateHandler: DownloadManager.UpdateImageHandler?) -> UIImage {
+    func makeIcon(currency: String?, updateHandler: DownloadManager.UpdateImageHandler?) -> UIImage {
         switch type {
         case .card:
-            guard let card = card, let number = card.number else {
-                return STPImageLibrary.unknownCardCardImage()
-            }
-
-            var brand = STPCardValidator.brand(forNumber: number)
-            // Handle co-banded cards for flow controller
-            if let networks = card.networks {
-                brand = networks.preferred?.toCardBrand ?? .unknown
-            }
-
+            let brand = STPCardValidator.brand(for: card)
             return STPImageLibrary.cardBrandImage(for: brand)
         default:
             // If there's no image specific to this PaymentMethod (eg card network logo, bank logo), default to the PaymentMethod type's icon
             // TODO: Refactor this out of PaymentMethodType. Users shouldn't have to convert STPPaymentMethodType to PaymentMethodType in order to get its image.
-            return PaymentSheet.PaymentMethodType.stripe(type).makeImage(updateHandler: updateHandler)
+            return PaymentSheet.PaymentMethodType.stripe(type).makeImage(currency: currency, updateHandler: updateHandler)
         }
     }
  }
@@ -161,7 +172,7 @@ extension STPPaymentMethodType {
         }
     }
 
-    func makeImage(forDarkBackground: Bool = false) -> UIImage? {
+    func makeImage(forDarkBackground: Bool = false, currency: String? = nil) -> UIImage? {
         let image: Image? = {
             switch self {
             case .card:
@@ -179,7 +190,7 @@ extension STPPaymentMethodType {
             case .przelewy24:
                 return .pm_type_p24
             case .afterpayClearpay:
-                return .pm_type_afterpay
+                return AfterpayPriceBreakdownView.shouldUseCashAppBrand(for: currency) ? .pm_type_cashapp : .pm_type_afterpay
             case .sofort, .klarna:
                 return .pm_type_klarna
             case .affirm:

@@ -19,6 +19,14 @@
 		@"RNDateTimePicker": NSClassFromString(@"RNDateTimePickerComponentView"), // @react-native-community/datetimepicker
 		@"RNGoogleSignInButton": NSClassFromString(@"RNGoogleSignInButtonComponentView"), // @react-native-google-signin/google-signin
 		@"RNCPicker": NSClassFromString(@"RNCPickerComponentView"), // @react-native-picker/picker
+		@"ApplePayButton": NSClassFromString(@"ApplePayButtonComponentView"), // @stripe/stripe-react-native
+		@"AddToWalletButton": NSClassFromString(@"AddToWalletButtonComponentView"), // @stripe/stripe-react-native
+		@"AddressSheetView": NSClassFromString(@"AddressSheetViewComponentView"), // @stripe/stripe-react-native
+		@"AuBECSDebitForm": NSClassFromString(@"AuBECSDebitFormComponentView"), // @stripe/stripe-react-native
+		@"CardField": NSClassFromString(@"CardFieldComponentView"), // @stripe/stripe-react-native
+		@"CardForm": NSClassFromString(@"CardFormComponentView"), // @stripe/stripe-react-native
+		@"EmbeddedPaymentElementView": NSClassFromString(@"EmbeddedPaymentElementViewComponentView"), // @stripe/stripe-react-native
+		@"StripeContainer": NSClassFromString(@"StripeContainerComponentView"), // @stripe/stripe-react-native
 		@"RNGestureHandlerButton": NSClassFromString(@"RNGestureHandlerButtonComponentView"), // react-native-gesture-handler
 		@"RNMapsGoogleMapView": NSClassFromString(@"RNMapsGoogleMapView"), // react-native-maps
 		@"RNMapsGooglePolygon": NSClassFromString(@"RNMapsGooglePolygonView"), // react-native-maps

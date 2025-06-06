@@ -1885,15 +1885,53 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNImageCropPicker (0.42.0):
+  - RNImageCropPicker (0.50.1):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.11.18.00)
+    - RCTRequired
+    - RCTTypeSafety
     - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
     - React-RCTImage
-    - RNImageCropPicker/QBImagePickerController (= 0.42.0)
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - RNImageCropPicker/QBImagePickerController (= 0.50.1)
     - TOCropViewController (~> 2.7.4)
-  - RNImageCropPicker/QBImagePickerController (0.42.0):
+    - Yoga
+  - RNImageCropPicker/QBImagePickerController (0.50.1):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.11.18.00)
+    - RCTRequired
+    - RCTTypeSafety
     - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
     - React-RCTImage
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
     - TOCropViewController (~> 2.7.4)
+    - Yoga
   - RNReanimated (3.18.0):
     - DoubleConversion
     - glog
@@ -2123,42 +2161,89 @@ PODS:
     - ReactCommon/turbomodule/core
     - Yoga
   - SocketRocket (0.7.1)
-  - Stripe (24.2.0):
-    - StripeApplePay (= 24.2.0)
-    - StripeCore (= 24.2.0)
-    - StripePayments (= 24.2.0)
-    - StripePaymentsUI (= 24.2.0)
-    - StripeUICore (= 24.2.0)
-  - stripe-react-native (0.41.0):
+  - Stripe (24.14.0):
+    - StripeApplePay (= 24.14.0)
+    - StripeCore (= 24.14.0)
+    - StripePayments (= 24.14.0)
+    - StripePaymentsUI (= 24.14.0)
+    - StripeUICore (= 24.14.0)
+  - stripe-react-native (0.47.1):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.11.18.00)
+    - RCTRequired
+    - RCTTypeSafety
     - React-Core
-    - Stripe (~> 24.2.0)
-    - StripeApplePay (~> 24.2.0)
-    - StripeFinancialConnections (~> 24.2.0)
-    - StripePayments (~> 24.2.0)
-    - StripePaymentSheet (~> 24.2.0)
-    - StripePaymentsUI (~> 24.2.0)
-  - StripeApplePay (24.2.0):
-    - StripeCore (= 24.2.0)
-  - StripeCore (24.2.0)
-  - StripeFinancialConnections (24.2.0):
-    - StripeCore (= 24.2.0)
-    - StripeUICore (= 24.2.0)
-  - StripePayments (24.2.0):
-    - StripeCore (= 24.2.0)
-    - StripePayments/Stripe3DS2 (= 24.2.0)
-  - StripePayments/Stripe3DS2 (24.2.0):
-    - StripeCore (= 24.2.0)
-  - StripePaymentSheet (24.2.0):
-    - StripeApplePay (= 24.2.0)
-    - StripeCore (= 24.2.0)
-    - StripePayments (= 24.2.0)
-    - StripePaymentsUI (= 24.2.0)
-  - StripePaymentsUI (24.2.0):
-    - StripeCore (= 24.2.0)
-    - StripePayments (= 24.2.0)
-    - StripeUICore (= 24.2.0)
-  - StripeUICore (24.2.0):
-    - StripeCore (= 24.2.0)
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Stripe (~> 24.14.0)
+    - stripe-react-native/NewArch (= 0.47.1)
+    - StripeApplePay (~> 24.14.0)
+    - StripeFinancialConnections (~> 24.14.0)
+    - StripePayments (~> 24.14.0)
+    - StripePaymentSheet (~> 24.14.0)
+    - StripePaymentsUI (~> 24.14.0)
+    - Yoga
+  - stripe-react-native/NewArch (0.47.1):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.11.18.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Stripe (~> 24.14.0)
+    - StripeApplePay (~> 24.14.0)
+    - StripeFinancialConnections (~> 24.14.0)
+    - StripePayments (~> 24.14.0)
+    - StripePaymentSheet (~> 24.14.0)
+    - StripePaymentsUI (~> 24.14.0)
+    - Yoga
+  - StripeApplePay (24.14.0):
+    - StripeCore (= 24.14.0)
+  - StripeCore (24.14.0)
+  - StripeFinancialConnections (24.14.0):
+    - StripeCore (= 24.14.0)
+    - StripeUICore (= 24.14.0)
+  - StripePayments (24.14.0):
+    - StripeCore (= 24.14.0)
+    - StripePayments/Stripe3DS2 (= 24.14.0)
+  - StripePayments/Stripe3DS2 (24.14.0):
+    - StripeCore (= 24.14.0)
+  - StripePaymentSheet (24.14.0):
+    - StripeApplePay (= 24.14.0)
+    - StripeCore (= 24.14.0)
+    - StripePayments (= 24.14.0)
+    - StripePaymentsUI (= 24.14.0)
+  - StripePaymentsUI (24.14.0):
+    - StripeCore (= 24.14.0)
+    - StripePayments (= 24.14.0)
+    - StripeUICore (= 24.14.0)
+  - StripeUICore (24.14.0):
+    - StripeCore (= 24.14.0)
   - TOCropViewController (2.7.4)
   - VisionCamera (4.6.4):
     - VisionCamera/Core (= 4.6.4)
@@ -2577,25 +2662,25 @@ SPEC CHECKSUMS:
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
   RNGestureHandler: 66e593addd8952725107cfaa4f5e3378e946b541
   RNGoogleSignin: 52671dbd79e1706d62ecbb46c74a12596eec20eb
-  RNImageCropPicker: 64b6bec9ec185ee59b71a93d7058816bd0e1916e
+  RNImageCropPicker: b782c9043db84b30264f178b3471fbd4dc151c16
   RNReanimated: c021f620a8a8494147399ed4e02fdc09fb60ac35
   RNScreens: 7a4eb8a0fe4dc5537e10559ddedc4709a9cd0561
   RNSVG: 12aacafb22cbe17f3f1ee1947d7b63cbbc3b9107
   RNVectorIcons: 14a0c42f16a26bcc3e79a19bc1c5718284b1d469
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
-  Stripe: be805dc0e80a7299de7b10ecbe01ce81412654c8
-  stripe-react-native: 01b57a63afbe42b57f24cebdde78eff3d602148b
-  StripeApplePay: 5233ecff535bb0772785d2d18d02b39ec24ecb71
-  StripeCore: e2f70fcaa82e5a9d44d18fe4534358384cdf4821
-  StripeFinancialConnections: 8c8e2273552d4567ec381ee2b0ff1745b8e11ab6
-  StripePayments: beb97f8061066532744ceaa03e59009c9716332e
-  StripePaymentSheet: 0d8ed5270037b1da3eb107c9876cec67b8b1fe43
-  StripePaymentsUI: 6486d8b86bf49b8932506807a8692ce16e9f109d
-  StripeUICore: b59aa9c9e202b6a03a556c3519eff578274f7598
+  Stripe: 6d254bcbf0706a656fb5d9d84cd77365c8b3c9f6
+  stripe-react-native: c6275d6e4967092dad30f26201af9fa46a208463
+  StripeApplePay: 4b1ef56530fb97ed699ec1d9120cdcbf3013748f
+  StripeCore: 16957868cac857937324a7cf4c9380ca1eda7e38
+  StripeFinancialConnections: ccaa2b1a77f8f617d16e51f7410a0d59d7a87346
+  StripePayments: 861a570434090ec08f8ba62e211fd03813b2a2f4
+  StripePaymentSheet: e4ae294f0e09b296a7dfc2c702e26ee30fe088a5
+  StripePaymentsUI: a8480e78da13266ce2d94e4ed0990258583a9cab
+  StripeUICore: 86c852985d9aece3658420f28ff73b27310e4249
   TOCropViewController: 80b8985ad794298fb69d3341de183f33d1853654
   VisionCamera: 3cc9afb487bb11de5dca69581e976ca473bb39ea
   Yoga: e14bad835e12b6c7e2260fc320bd00e0f4b45add
 
-PODFILE CHECKSUM: 9f03194e8a773f36bfd4f4d6f54873161160de85
+PODFILE CHECKSUM: 81915fde9944ac79ecb78a0b9501a6ec7a5257e8
 
 COCOAPODS: 1.16.2

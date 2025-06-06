@@ -18,6 +18,8 @@ extension RowButton {
             case viewMoreChevron
             case viewMore
             case update
+            case change
+            case changeWithChevron
 
             var text: String? {
                 switch self {
@@ -27,14 +29,16 @@ extension RowButton {
                     return .Localized.view_more
                 case .update:
                     return nil
+                case .change, .changeWithChevron:
+                    return .Localized.change
                 }
             }
 
             var accessoryImage: UIImage? {
                 switch self {
-                case .edit, .viewMore:
+                case .edit, .viewMore, .change:
                     return nil
-                case .viewMoreChevron, .update:
+                case .viewMoreChevron, .update, .changeWithChevron:
                     return Image.icon_chevron_right.makeImage(template: true).withAlignmentRectInsets(UIEdgeInsets(top: -2, left: 0, bottom: 0, right: 0))
                 }
             }
@@ -43,12 +47,7 @@ extension RowButton {
         private var label: UILabel {
             let label = UILabel()
             label.text = accessoryType.text
-            switch accessoryType {
-            case .edit, .viewMoreChevron, .update:
-                label.font = appearance.scaledFont(for: appearance.font.base.medium, style: .footnote, maximumPointSize: 20)
-            case .viewMore:
-                label.font = appearance.scaledFont(for: appearance.font.base.medium, size: 14, maximumPointSize: 20)
-            }
+            label.font = appearance.scaledFont(for: appearance.font.base.medium, style: .footnote, maximumPointSize: 20)
             if #available(iOS 15.0, *) {
                 label.minimumContentSizeCategory = .large
             }
@@ -65,8 +64,7 @@ extension RowButton {
             let imageView = UIImageView(image: image)
             if accessoryType == .update {
                 imageView.tintColor = appearance.colors.icon
-            }
-            else {
+            } else {
                 imageView.tintColor = appearance.colors.primary // TODO(porter) use secondary action color
             }
             imageView.contentMode = .scaleAspectFit
@@ -79,6 +77,15 @@ extension RowButton {
             let stackView = UIStackView(arrangedSubviews: views)
             stackView.spacing = 4
             return stackView
+        }
+
+        override var isHidden: Bool {
+            get { super.isHidden }
+            set {
+                super.isHidden = newValue
+                // This shouldn't be necessary, but for unknown reasons VoiceOver sometimes reads this button even when it's hidden
+                isAccessibilityElement = !isHidden
+            }
         }
 
         let accessoryType: AccessoryType
@@ -130,8 +137,8 @@ extension RowButton {
 
         // MARK: - UIGestureRecognizerDelegate
         func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-            // Without this, the long press prevents you from scrolling or the tap gesture from triggering.
-            true
+            // Without this, the long press prevents you from scrolling or our tap/pan gesture from triggering together.
+            return otherGestureRecognizer is UIPanGestureRecognizer || (gestureRecognizers?.contains(otherGestureRecognizer) ?? false)
         }
     }
 }
@@ -166,6 +173,7 @@ extension RowButton.RightAccessoryButton {
                                        isCBCEligible: Bool,
                                        allowsRemovalOfLastSavedPaymentMethod: Bool,
                                        allowsPaymentMethodRemoval: Bool,
+                                       allowsPaymentMethodUpdate: Bool,
                                        isFlatCheckmarkStyle: Bool = false) -> AccessoryType? {
         guard savedPaymentMethodsCount > 0 else { return nil }
 
@@ -175,6 +183,6 @@ extension RowButton.RightAccessoryButton {
         }
 
         // We only have 1 payment method... show the edit icon if the card brand can be updated or if it can be removed
-        return (isFirstCardCoBranded && isCBCEligible) || (allowsRemovalOfLastSavedPaymentMethod && allowsPaymentMethodRemoval) ? .edit : nil
+        return (isFirstCardCoBranded && isCBCEligible) || (allowsRemovalOfLastSavedPaymentMethod && allowsPaymentMethodRemoval) || allowsPaymentMethodUpdate ? .edit : nil
     }
 }

@@ -9,6 +9,7 @@
 import Foundation
 
 @_spi(STP) import StripeCore
+@_exported @_spi(STP) import StripePayments
 
 /// Provides a method for looking up Link accounts by email.
 protocol LinkAccountServiceProtocol {
@@ -23,9 +24,13 @@ protocol LinkAccountServiceProtocol {
     ///
     /// - Parameters:
     ///   - email: Email address associated with the account.
+    ///   - emailSource: Details on the source of the email used.
+    ///   - doNotLogConsumerFunnelEvent: Whether or not this lookup call should be logged backend side.
     ///   - completion: Completion block.
     func lookupAccount(
         withEmail email: String?,
+        emailSource: EmailSource,
+        doNotLogConsumerFunnelEvent: Bool,
         completion: @escaping (Result<PaymentSheetLinkAccount?, Error>) -> Void
     )
 }
@@ -34,25 +39,45 @@ final class LinkAccountService: LinkAccountServiceProtocol {
 
     let apiClient: STPAPIClient
     let cookieStore: LinkCookieStore
+    let sessionID: String
+    let useMobileEndpoints: Bool
 
     /// The default cookie store used by new instances of the service.
     static var defaultCookieStore: LinkCookieStore = LinkSecureCookieStore.shared
 
+    convenience init(
+        apiClient: STPAPIClient = .shared,
+        cookieStore: LinkCookieStore = defaultCookieStore,
+        elementsSession: STPElementsSession
+    ) {
+        self.init(apiClient: apiClient, cookieStore: cookieStore, useMobileEndpoints: elementsSession.linkSettings?.useAttestationEndpoints ?? false, sessionID: elementsSession.sessionID)
+    }
+
     init(
         apiClient: STPAPIClient = .shared,
-        cookieStore: LinkCookieStore = defaultCookieStore
+        cookieStore: LinkCookieStore = defaultCookieStore,
+        useMobileEndpoints: Bool,
+        sessionID: String
     ) {
         self.apiClient = apiClient
         self.cookieStore = cookieStore
+        self.useMobileEndpoints = useMobileEndpoints
+        self.sessionID = sessionID
     }
 
     func lookupAccount(
         withEmail email: String?,
+        emailSource: EmailSource,
+        doNotLogConsumerFunnelEvent: Bool,
         completion: @escaping (Result<PaymentSheetLinkAccount?, Error>) -> Void
     ) {
         ConsumerSession.lookupSession(
             for: email,
-            with: apiClient
+            emailSource: emailSource,
+            sessionID: sessionID,
+            with: apiClient,
+            useMobileEndpoints: useMobileEndpoints,
+            doNotLogConsumerFunnelEvent: doNotLogConsumerFunnelEvent
         ) { [apiClient] result in
             switch result {
             case .success(let lookupResponse):
@@ -64,7 +89,8 @@ final class LinkAccountService: LinkAccountServiceProtocol {
                             email: session.consumerSession.emailAddress,
                             session: session.consumerSession,
                             publishableKey: session.publishableKey,
-                            apiClient: apiClient
+                            apiClient: apiClient,
+                            useMobileEndpoints: self.useMobileEndpoints
                         )
                     ))
                 case .notFound:
@@ -74,7 +100,8 @@ final class LinkAccountService: LinkAccountServiceProtocol {
                                 email: email,
                                 session: nil,
                                 publishableKey: nil,
-                                apiClient: self.apiClient
+                                apiClient: self.apiClient,
+                                useMobileEndpoints: self.useMobileEndpoints
                             )
                         ))
                     } else {

@@ -177,8 +177,12 @@ public class PaymentSheet {
                     }()
                     self.bottomSheetViewController.setViewControllers([paymentSheetVC])
                 }
-                if let linkAccount = LinkAccountContext.shared.account, loadResult.elementsSession.shouldShowLink2FABeforePaymentSheet(for: linkAccount, configuration: self.configuration) {
-                    let verificationController = LinkVerificationController(mode: .inlineLogin, linkAccount: linkAccount)
+                if let linkAccount = LinkAccountContext.shared.account, loadResult.elementsSession.shouldShowLink2FABeforePaymentSheet(for: linkAccount) {
+                    let verificationController = LinkVerificationController(
+                        mode: .inlineLogin,
+                        linkAccount: linkAccount,
+                        configuration: self.configuration
+                    )
                     verificationController.present(from: self.bottomSheetViewController) { result in
                         switch result {
                         case .completed:
@@ -226,6 +230,10 @@ public class PaymentSheet {
     }
 
     // MARK: - Internal Properties
+
+    /// Decides whether Link payment methods should be shown in the list of saved payment methods.
+    /// Only enable this in the PaymentSheet playground.
+    @_spi(STP) public static var enableLinkInSPM: Bool = false
 
     /// The initialization mode this instance was initialized with
     let mode: InitializationMode
@@ -337,7 +345,8 @@ extension PaymentSheet: PaymentSheetViewControllerDelegate {
     }
 
     func paymentSheetViewControllerDidSelectPayWithLink(_ paymentSheetViewController: PaymentSheetViewControllerProtocol) {
-        if configuration.forceNativeLinkEnabled {
+        let useNativeLink = deviceCanUseNativeLink(elementsSession: paymentSheetViewController.elementsSession, configuration: configuration)
+        if useNativeLink {
             self.presentPayWithNativeLinkController(
                 from: paymentSheetViewController,
                 intent: paymentSheetViewController.intent,

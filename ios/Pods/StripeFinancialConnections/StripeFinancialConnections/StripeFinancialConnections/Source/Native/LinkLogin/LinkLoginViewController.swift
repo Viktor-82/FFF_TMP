@@ -30,6 +30,11 @@ protocol LinkLoginViewControllerDelegate: AnyObject {
         _ viewController: LinkLoginViewController,
         didReceiveTerminalError error: Error
     )
+
+    func linkLoginViewControllerDidFailAttestationVerdict(
+        _ viewController: LinkLoginViewController,
+        prefillDetails: WebPrefillDetails
+    )
 }
 
 final class LinkLoginViewController: UIViewController {
@@ -37,13 +42,13 @@ final class LinkLoginViewController: UIViewController {
     weak var delegate: LinkLoginViewControllerDelegate?
 
     private lazy var loadingView: SpinnerView = {
-        return SpinnerView(theme: dataSource.manifest.theme)
+        return SpinnerView(appearance: dataSource.manifest.appearance)
     }()
 
     private lazy var formView: LinkSignupFormView = {
         let formView = LinkSignupFormView(
             accountholderPhoneNumber: dataSource.manifest.accountholderPhoneNumber,
-            theme: dataSource.manifest.theme
+            appearance: dataSource.manifest.appearance
         )
         formView.delegate = self
         return formView
@@ -51,6 +56,10 @@ final class LinkLoginViewController: UIViewController {
 
     private var paneLayoutView: PaneLayoutView?
     private var footerButton: StripeUICore.Button?
+    private var prefillEmailAddress: String? {
+        let email = dataSource.manifest.accountholderCustomerEmailAddress ?? dataSource.elementsSessionContext?.prefillDetails?.email
+        return email?.isEmpty == false ? email : nil
+    }
 
     init(dataSource: LinkLoginDataSource) {
         self.dataSource = dataSource
@@ -63,7 +72,7 @@ final class LinkLoginViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .customBackgroundColor
+        view.backgroundColor = FinancialConnectionsAppearance.Colors.background
 
         showLoadingView(true)
         dataSource
@@ -100,7 +109,7 @@ final class LinkLoginViewController: UIViewController {
                 action: didSelectContinueWithLink
             ),
             topText: linkLoginPane.aboveCta,
-            theme: dataSource.manifest.theme,
+            appearance: dataSource.manifest.appearance,
             didSelectURL: didSelectURLInTextFromBackend
         )
         self.footerButton = footerView.primaryButton
@@ -118,11 +127,10 @@ final class LinkLoginViewController: UIViewController {
         paneLayoutView?.scrollView.keyboardDismissMode = .onDrag
         #endif
 
-        let emailAddress = dataSource.manifest.accountholderCustomerEmailAddress ?? dataSource.elementsSessionContext?.prefillDetails?.email
-        if let emailAddress, !emailAddress.isEmpty {
+        if let prefillEmailAddress {
             // Immediately set the button state to loading here to bypass the debouncing by the textfield.
             footerButton?.isLoading = true
-            formView.prefillEmailAddress(emailAddress)
+            formView.prefillEmailAddress(prefillEmailAddress)
 
             let phoneNumber = dataSource.manifest.accountholderPhoneNumber ?? dataSource.elementsSessionContext?.prefillDetails?.formattedPhoneNumber
             formView.prefillPhoneNumber(phoneNumber)
@@ -157,13 +165,27 @@ final class LinkLoginViewController: UIViewController {
         formView.emailTextField.showLoadingView(true)
         footerButton?.isLoading = true
 
+        let manuallyEnteredEmail = emailAddress != prefillEmailAddress
         dataSource
-            .lookup(emailAddress: emailAddress)
+            .lookup(
+                emailAddress: emailAddress,
+                manuallyEntered: manuallyEnteredEmail
+            )
             .observe { [weak self, weak formView, weak footerButton] result in
                 formView?.emailTextField.showLoadingView(false)
                 footerButton?.isLoading = false
 
                 guard let self else { return }
+                let attestationError = self.dataSource.completeAssertionIfNeeded(
+                    possibleError: result.error,
+                    api: .consumerSessionLookup
+                )
+                if attestationError != nil {
+                    let prefillDetails = WebPrefillDetails(email: emailAddress)
+                    self.delegate?.linkLoginViewControllerDidFailAttestationVerdict(self, prefillDetails: prefillDetails)
+                    return
+                }
+
                 switch result {
                 case .success(let response):
                     if response.exists {
@@ -205,6 +227,19 @@ final class LinkLoginViewController: UIViewController {
         .observe { [weak self] result in
             guard let self else { return }
             self.footerButton?.isLoading = false
+            let attestationError = self.dataSource.completeAssertionIfNeeded(
+                possibleError: result.error,
+                api: .linkSignUp
+            )
+            if attestationError != nil {
+                let prefillDetails = WebPrefillDetails(
+                    email: self.formView.email,
+                    phone: self.formView.phoneNumber,
+                    countryCode: self.formView.countryCode
+                )
+                self.delegate?.linkLoginViewControllerDidFailAttestationVerdict(self, prefillDetails: prefillDetails)
+                return
+            }
 
             switch result {
             case .success(let response):

@@ -92,6 +92,9 @@ extension PaymentSheet {
         /// If set, PaymentSheet displays Apple Pay as a payment option
         public var applePay: ApplePayConfiguration?
 
+        /// Configuration related to Link
+        public var link: LinkConfiguration = LinkConfiguration()
+
         /// The color of the Buy or Add button. Defaults to `.systemBlue` when `nil`.
         public var primaryButtonColor: UIColor? {
             get {
@@ -183,6 +186,9 @@ extension PaymentSheet {
         /// Configuration for external payment methods.
         public var externalPaymentMethodConfiguration: ExternalPaymentMethodConfiguration?
 
+        /// Configuration for custom payment methods.
+        @_spi(CustomPaymentMethodsBeta) public var customPaymentMethodConfiguration: CustomPaymentMethodConfiguration?
+
         /// By default, PaymentSheet will use a dynamic ordering that optimizes payment method display for the customer.
         /// You can override the default order in which payment methods are displayed in PaymentSheet with a list of payment method types.
         /// See https://stripe.com/docs/api/payment_methods/object#payment_method_object-type for the list of valid types.  You may also pass external payment methods.
@@ -191,9 +197,8 @@ extension PaymentSheet {
         public var paymentMethodOrder: [String]?
 
         // MARK: Internal
+        // PaymentSheet components are only being used for Link.
         internal var linkPaymentMethodsOnly: Bool = false
-
-        @_spi(STP) public var forceNativeLinkEnabled: Bool = false
 
         /// This is an experimental feature that may be removed at any time.
         /// If true (the default), the customer can delete all saved payment methods.
@@ -209,12 +214,8 @@ extension PaymentSheet {
         /// Note: For Apple Pay, the list of supported card brands is determined by combining `StripeAPI.supportedPKPaymentNetworks()` with `StripeAPI.additionalEnabledApplePayNetworks` and then applying the `cardBrandAcceptance` filter. This filtered list is then assigned to `PKPaymentRequest.supportedNetworks`, ensuring that only the allowed card brands are available for Apple Pay transactions. Any `PKPaymentNetwork` that does not correspond to a `BrandCategory` will be blocked if you have specified an allow list, or will not be blocked if you have specified a disallow list.
         /// Note: This is only a client-side solution.
         /// Note: Card brand filtering is not currently supported by Link.
-        @_spi(CardBrandFilteringBeta) public var cardBrandAcceptance: PaymentSheet.CardBrandAcceptance = .all
+        public var cardBrandAcceptance: PaymentSheet.CardBrandAcceptance = .all
 
-        /// This is an experimental feature that may be removed at any time.
-        /// If true, users can set a payment method as default and sync their default payment method across web and mobile
-        /// If false (default), users cannot set default payment methods.
-        @_spi(AllowsSetAsDefaultPM) public var allowsSetAsDefaultPM = false
     }
 
     /// Defines the layout orientations available for displaying payment methods in PaymentSheet.
@@ -353,6 +354,34 @@ extension PaymentSheet {
             self.buttonType = buttonType
             self.paymentSummaryItems = paymentSummaryItems
             self.customHandlers = customHandlers
+        }
+    }
+
+    /// Configuration related to Link
+    public struct LinkConfiguration {
+        /// The Link display mode.
+        public var display: Display = .automatic
+
+        /// Display configuration for Link
+        public enum Display: String {
+            /// Link will be displayed when available.
+            case automatic
+            /// Link will never be displayed.
+            case never
+        }
+
+        var shouldDisplay: Bool {
+            switch display {
+            case .automatic: true
+            case .never: false
+            }
+        }
+
+        /// Initializes a LinkConfiguration
+        public init(
+            display: Display = .automatic
+        ) {
+            self.display = display
         }
     }
 
@@ -513,6 +542,59 @@ extension PaymentSheet {
         /// - Note: This is always called on the main thread.
         public var externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler
     }
+
+    /// Configuration for custom payment methods
+    @_spi(CustomPaymentMethodsBeta) public struct CustomPaymentMethodConfiguration {
+
+        /// Defines a custom payment method type that can be displayed in PaymentSheet
+        public struct CustomPaymentMethod {
+
+            /// The unique identifier for this custom payment method type in the format of "cpmt_..."
+            /// Obtained from the Stripe Dashboard at https://dashboard.stripe.com/settings/custom_payment_methods
+            public let id: String
+
+            /// Optional subtitle text to be displayed below the custom payment method's display name.
+            public let subtitle: String?
+
+            /// When false, PaymentSheet will collect billing details for this custom payment method type
+            /// in accordance with the `billingDetailsCollectionConfiguration` settings.
+            /// This has no effect if `billingDetailsCollectionConfiguration` is not configured.
+            public var disableBillingDetailCollection = true
+
+            /// Initializes an `CustomPaymentMethod`
+            /// - Parameters:
+            ///   - id: The unique identifier for this custom payment method type in the format of "cpmt_..."
+            ///   - subtitle: Optional subtitle text to be displayed below the custom payment method's display name.
+            public init(id: String, subtitle: String? = nil) {
+                self.id = id
+                self.subtitle = subtitle
+            }
+        }
+
+        /// Initializes an `CustomPaymentMethodConfiguration`
+        /// - Parameter customPaymentMethods: A list of custom payment methods to display in PaymentSheet.
+        /// - Parameter customPaymentMethodConfirmHandler: A handler called when the customer confirms the payment using a custom payment method.
+        public init(customPaymentMethods: [CustomPaymentMethod], customPaymentMethodConfirmHandler: @escaping PaymentSheet.CustomPaymentMethodConfiguration.CustomPaymentMethodConfirmHandler) {
+            self.customPaymentMethods = customPaymentMethods
+            self.customPaymentMethodConfirmHandler = customPaymentMethodConfirmHandler
+        }
+
+        /// A list of custom payment methods types to display in PaymentSheet.
+        public var customPaymentMethods: [CustomPaymentMethod] = []
+
+        /// - Parameter customPaymentMethod: The custom payment method to confirm payment with
+        /// - Parameter billingDetails: An object containing any billing details you've configured PaymentSheet to collect.
+        /// - Returns: The result of the attempt to confirm payment using the given custom payment method.
+        public typealias CustomPaymentMethodConfirmHandler = (
+            _ customPaymentMethod: CustomPaymentMethod,
+            _ billingDetails: STPPaymentMethodBillingDetails
+        ) async -> PaymentSheetResult
+
+        /// This handler is called when the customer confirms the payment using an custom payment method.
+        /// Your implementation should complete the payment and return the result.
+        /// - Note: This is always called on the main thread.
+        public var customPaymentMethodConfirmHandler: CustomPaymentMethodConfirmHandler
+    }
 }
 
 extension STPPaymentMethodBillingDetails {
@@ -540,7 +622,7 @@ extension PaymentSheet.CustomerConfiguration {
     }
 }
 
-@_spi(CardBrandFilteringBeta) extension PaymentSheet {
+extension PaymentSheet {
     /// Options to block certain card brands on the client
     public enum CardBrandAcceptance: Equatable {
 

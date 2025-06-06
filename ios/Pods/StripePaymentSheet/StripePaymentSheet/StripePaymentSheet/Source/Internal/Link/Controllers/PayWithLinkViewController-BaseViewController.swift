@@ -20,9 +20,7 @@ extension PayWithLinkViewController {
         let context: Context
 
         var preferredContentMargins: NSDirectionalEdgeInsets {
-            return customNavigationBar.isLarge
-                ? LinkUI.contentMarginsWithLargeNav
-                : LinkUI.contentMargins
+            LinkUI.contentMargins
         }
 
         private(set) lazy var customNavigationBar: LinkNavigationBar = {
@@ -97,7 +95,7 @@ extension PayWithLinkViewController {
         @objc
         func onCloseButtonTapped(_ sender: UIButton) {
             if context.shouldFinishOnClose {
-                coordinator?.finish(withResult: .canceled)
+                coordinator?.finish(withResult: .canceled, deferredIntentConfirmationType: nil)
             } else {
                 coordinator?.cancel()
             }

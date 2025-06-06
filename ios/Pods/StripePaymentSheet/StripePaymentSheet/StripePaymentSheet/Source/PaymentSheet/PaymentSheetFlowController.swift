@@ -23,7 +23,7 @@ extension PaymentSheet {
         case saved(paymentMethod: STPPaymentMethod, confirmParams: IntentConfirmParams?)
         case new(confirmParams: IntentConfirmParams)
         case link(option: LinkConfirmOption)
-        case external(paymentMethod: ExternalPaymentMethod, billingDetails: STPPaymentMethodBillingDetails)
+        case external(paymentMethod: ExternalPaymentOption, billingDetails: STPPaymentMethodBillingDetails)
 
         var paymentMethodTypeAnalyticsValue: String {
             switch self {
@@ -33,8 +33,8 @@ extension PaymentSheet {
                 return paymentMethod.type.identifier
             case .new(confirmParams: let confirmParams):
                 return confirmParams.paymentMethodType.identifier
-            case .link:
-                return STPPaymentMethodType.link.identifier
+            case .link(let confirmationOption):
+                return confirmationOption.paymentMethodType
             case .external(let paymentMethod, _):
                 return paymentMethod.type
             }
@@ -67,7 +67,7 @@ extension PaymentSheet {
         // need a "link_context."
         var linkContextAnalyticsValue: String? {
             if case .link = self {
-                return "wallet"
+               return "wallet"
             } else if
                 case .new(let confirmParams) = self,
                 let linkedBank = confirmParams.instantDebitsLinkedBank
@@ -81,6 +81,35 @@ extension PaymentSheet {
                 return nil
             }
         }
+
+        // The confirmation type used by Link
+        var linkUIAnalyticsValue: String? {
+            if case .link(let option) = self {
+                switch option {
+                case .withPaymentDetails(let account, _, _):
+                    if account.hasCompletedSMSVerification {
+                        // This was a returning user who logged in
+                        return "native-returning"
+                    } else if account.sessionState == .verified {
+                        return "native-signup"
+                    } else {
+                        // Should never reach this
+                        stpAssertionFailure()
+                        return "native-unknown"
+                    }
+                case .withPaymentMethod:
+                    return "web-popup"
+                case .wallet:
+                    // From the "Link" button in FlowController, a separate Link popup
+                    return "native-popup"
+                case .signUp:
+                    return "inline-signup"
+                }
+            } else {
+                return nil
+            }
+        }
+
         var isExternal: Bool {
             if case .external = self {
                 return true
@@ -108,8 +137,8 @@ extension PaymentSheet {
             /// - If this is Apple Pay, the value is "apple_pay"
             public let paymentMethodType: String
 
-            init(paymentOption: PaymentOption) {
-                image = paymentOption.makeIcon(updateImageHandler: nil)
+            init(paymentOption: PaymentOption, currency: String?) {
+                image = paymentOption.makeIcon(currency: currency, updateImageHandler: nil)
                 switch paymentOption {
                 case .applePay:
                     label = String.Localized.apple_pay
@@ -125,10 +154,10 @@ extension PaymentSheet {
                     billingDetails = confirmParams.paymentMethodParams.billingDetails?.toPaymentSheetBillingDetails()
                 case .link(let option):
                     label = option.paymentSheetLabel
-                    paymentMethodType = STPPaymentMethodType.link.identifier
+                    paymentMethodType = option.paymentMethodType
                     billingDetails = option.billingDetails?.toPaymentSheetBillingDetails()
                 case .external(let paymentMethod, let stpBillingDetails):
-                    label = paymentMethod.label
+                    label = paymentMethod.displayText
                     paymentMethodType = paymentMethod.type
                     billingDetails = stpBillingDetails.toPaymentSheetBillingDetails()
                 }
@@ -142,7 +171,7 @@ extension PaymentSheet {
         /// You can use this to e.g. display the payment option in your UI.
         public var paymentOption: PaymentOptionDisplayData? {
             if let selectedPaymentOption = _paymentOption {
-                return PaymentOptionDisplayData(paymentOption: selectedPaymentOption)
+                return PaymentOptionDisplayData(paymentOption: selectedPaymentOption, currency: intent.currency)
             }
             return nil
         }
@@ -365,8 +394,7 @@ extension PaymentSheet {
 
             guard let paymentOption = _paymentOption else {
                 assertionFailure("`confirm` should only be called when `paymentOption` is not nil")
-                let error = PaymentSheetError.flowControllerConfirmFailed(message: "confirmPayment was called with a nil paymentOption")
-                completion(.failed(error: error))
+                completion(.failed(error: PaymentSheetError.confirmingWithInvalidPaymentOption))
                 return
             }
 

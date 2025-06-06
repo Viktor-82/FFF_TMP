@@ -89,6 +89,8 @@ import UIKit
     /// Determines the `Stripe-Livemode` header value when the publishable key is a user key
     @_spi(DashboardOnly) public var userKeyLiveMode = true
 
+    @_spi(STP) public lazy var stripeAttest: StripeAttest = StripeAttest(apiClient: self)
+
     // MARK: Initializers
     override public init() {
         sourcePollers = [:]
@@ -527,7 +529,7 @@ extension STPAPIClient {
             completionHandler: { (data, response, error) in
                 DispatchQueue.main.async {
                     completion(
-                        STPAPIClient.decodeResponse(data: data, error: error, response: response)
+                        STPAPIClient.decodeResponse(data: data, error: error, response: response, request: request)
                     )
                 }
             }
@@ -537,7 +539,8 @@ extension STPAPIClient {
     @_spi(STP) public static func decodeResponse<T: Decodable>(
         data: Data?,
         error: Error?,
-        response: URLResponse?
+        response: URLResponse?,
+        request: URLRequest? = nil
     ) -> Result<T, Error> {
         if let error = error {
             return .failure(error)
@@ -547,6 +550,14 @@ extension STPAPIClient {
         }
 
         do {
+            #if DEBUG
+            if let httpResponse = response as? HTTPURLResponse,
+               let method = request?.httpMethod,
+               let requestId = httpResponse.value(forHTTPHeaderField: "request-id"),
+               let url = httpResponse.value(forKey: "URL") as? URL {
+                print("[Stripe SDK]: \(method) \"\(url.relativePath)\" \(httpResponse.statusCode) \(requestId)")
+            }
+            #endif
             // HACK: We must first check if EmptyResponses contain an error since it'll always parse successfully.
             if T.self == EmptyResponse.self,
                 let decodedStripeError = decodeStripeErrorResponse(data: data, response: response)

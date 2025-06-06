@@ -33,13 +33,8 @@ extension PaymentSheet {
         /// Confirm intent with paymentDetails.
         case withPaymentDetails(
             account: PaymentSheetLinkAccount,
-            paymentDetails: ConsumerPaymentDetails
-        )
-
-        /// Confirm with Payment Method Params.
-        case withPaymentMethodParams(
-            account: PaymentSheetLinkAccount,
-            paymentMethodParams: STPPaymentMethodParams
+            paymentDetails: ConsumerPaymentDetails,
+            confirmationExtras: LinkConfirmationExtras?
         )
     }
 
@@ -57,9 +52,7 @@ extension PaymentSheet.LinkConfirmOption {
             return account
         case .withPaymentMethod:
             return nil
-        case .withPaymentDetails(let account, _):
-            return account
-        case .withPaymentMethodParams(let account, _):
+        case .withPaymentDetails(let account, _, _):
             return account
         }
     }
@@ -72,10 +65,17 @@ extension PaymentSheet.LinkConfirmOption {
             return intentConfirmParams.paymentMethodParams.paymentSheetLabel
         case .withPaymentMethod(let paymentMethod):
             return paymentMethod.paymentSheetLabel
-        case .withPaymentDetails(_, let paymentDetails):
+        case .withPaymentDetails(_, let paymentDetails, _):
             return paymentDetails.paymentSheetLabel
-        case .withPaymentMethodParams(_, let paymentMethodParams):
-            return paymentMethodParams.paymentSheetLabel
+        }
+    }
+
+    var paymentMethodType: String {
+        switch self {
+        case .signUp(_, _, _, _, let intentConfirmParams):
+            return intentConfirmParams.paymentMethodParams.type.identifier
+        case .wallet, .withPaymentMethod, .withPaymentDetails:
+            return STPPaymentMethodType.link.identifier
         }
     }
 
@@ -87,10 +87,8 @@ extension PaymentSheet.LinkConfirmOption {
             return intentConfirmParams.paymentMethodParams.billingDetails
         case .withPaymentMethod(let paymentMethod):
             return paymentMethod.billingDetails
-        case .withPaymentDetails(_, let paymentDetails):
+        case .withPaymentDetails(_, let paymentDetails, _):
             return STPPaymentMethodBillingDetails(billingAddress: paymentDetails.billingAddress, email: paymentDetails.billingEmailAddress)
-        case .withPaymentMethodParams(_, let paymentMethodParams):
-            return paymentMethodParams.billingDetails
         }
     }
 

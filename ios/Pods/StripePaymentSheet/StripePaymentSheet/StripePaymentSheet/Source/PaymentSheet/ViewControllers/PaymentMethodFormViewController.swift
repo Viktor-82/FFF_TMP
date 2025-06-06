@@ -71,7 +71,8 @@ class PaymentMethodFormViewController: UIViewController {
 
     lazy var formStackView: UIStackView = {
         let stackView = UIStackView(arrangedSubviews: [headerView, form.view].compactMap { $0 })
-        stackView.spacing = 24
+        // Forms with a subtitle get special spacing after the header view
+        stackView.spacing = form.getAllUnwrappedSubElements().contains(where: { $0 is SubtitleElement }) ? 4 : 24
         stackView.axis = .vertical
         return stackView
     }()
@@ -109,10 +110,11 @@ class PaymentMethodFormViewController: UIViewController {
             self.form = PaymentSheetFormFactory(
                 intent: intent,
                 elementsSession: elementsSession,
-                configuration: .paymentSheet(configuration),
+                configuration: .paymentElement(configuration),
                 paymentMethod: paymentMethodType,
                 previousCustomerInput: previousCustomerInput,
                 linkAccount: LinkAccountContext.shared.account,
+                accountService: LinkAccountService(apiClient: configuration.apiClient, elementsSession: elementsSession),
                 analyticsHelper: analyticsHelper
             ).make()
             self.formCache[type] = form
@@ -172,6 +174,17 @@ extension PaymentMethodFormViewController: ElementDelegate {
         analyticsHelper.logFormInteracted(paymentMethodTypeIdentifier: paymentMethodType.identifier)
         delegate?.didUpdate(self)
         animateHeightChange()
+
+        if let instantDebitsFormElement = form as? InstantDebitsPaymentMethodElement {
+            let incentive = instantDebitsFormElement.displayableIncentive
+
+            if let formHeaderView = headerView as? FormHeaderView {
+                // We already display a promo badge in the bank form, so we don't want
+                // to display another one in the header.
+                let headerIncentive = instantDebitsFormElement.showIncentiveInHeader ? incentive : nil
+                formHeaderView.setIncentive(headerIncentive)
+            }
+        }
     }
 }
 
@@ -246,7 +259,7 @@ extension PaymentMethodFormViewController {
             case .setupIntent(let setupIntent):
                 return .setup(setupIntent.stripeID)
             case .deferredIntent:
-                return nil
+                return .deferred(elementsSession.sessionID)
             }
         }()
 
@@ -271,8 +284,16 @@ extension PaymentMethodFormViewController {
             intentId: intentId,
             linkMode: linkMode,
             billingDetails: billingDetails,
-            eligibleForIncentive: instantDebitsFormElement?.incentive != nil
+            eligibleForIncentive: instantDebitsFormElement?.displayableIncentive != nil
         )
+    }
+
+    private var bankAccountCollectorStyle: STPBankAccountCollectorUserInterfaceStyle {
+        switch configuration.style {
+        case .automatic: return .automatic
+        case .alwaysLight: return .alwaysLight
+        case .alwaysDark: return .alwaysDark
+        }
     }
 
     private var shouldOverridePrimaryButton: Bool {
@@ -345,7 +366,7 @@ extension PaymentMethodFormViewController {
             with: name,
             email: email
         )
-        let client = STPBankAccountCollector()
+        let client = STPBankAccountCollector(style: bankAccountCollectorStyle)
         let genericError = PaymentSheetError.accountLinkFailure
 
         let financialConnectionsCompletion: STPBankAccountCollector.CollectBankAccountCompletionBlock = { result, _, error in
@@ -401,7 +422,7 @@ extension PaymentMethodFormViewController {
             let amount: Int?
             let currency: String?
             switch intentConfig.mode {
-            case let .payment(amount: _amount, currency: _currency, _, _):
+            case let .payment(amount: _amount, currency: _currency, _, _, _):
                 amount = _amount
                 currency = _currency
             case let .setup(currency: _currency, _):
@@ -437,7 +458,7 @@ extension PaymentMethodFormViewController {
         let params = STPCollectBankAccountParams.collectInstantDebitsParams(
             email: instantDebitsFormElement.email
         )
-        let client = STPBankAccountCollector()
+        let client = STPBankAccountCollector(style: bankAccountCollectorStyle)
         let genericError = PaymentSheetError.accountLinkFailure
 
         let financialConnectionsCompletion: STPBankAccountCollector.CollectBankAccountCompletionBlock = { result, _, error in
@@ -502,7 +523,7 @@ extension PaymentMethodFormViewController {
             let amount: Int?
             let currency: String?
             switch intentConfig.mode {
-            case let .payment(amount: _amount, currency: _currency, _, _):
+            case let .payment(amount: _amount, currency: _currency, _, _, _):
                 amount = _amount
                 currency = _currency
             case let .setup(currency: _currency, _):
@@ -525,7 +546,7 @@ extension PaymentMethodFormViewController {
     }
 }
 
-private extension LinkBankPaymentMethod {
+extension LinkBankPaymentMethod {
 
     func decode() -> STPPaymentMethod? {
         return STPPaymentMethod.decodedObject(fromAPIResponse: allResponseFields)

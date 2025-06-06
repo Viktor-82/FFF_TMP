@@ -26,7 +26,8 @@ protocol PayWithLinkViewControllerDelegate: AnyObject {
 
     func payWithLinkViewControllerDidFinish(
         _ payWithLinkViewController: PayWithLinkViewController,
-        result: PaymentSheetResult
+        result: PaymentSheetResult,
+        deferredIntentConfirmationType: STPAnalyticsClient.DeferredIntentConfirmationType?
     )
 
 }
@@ -35,14 +36,16 @@ protocol PayWithLinkCoordinating: AnyObject {
     func confirm(
         with linkAccount: PaymentSheetLinkAccount,
         paymentDetails: ConsumerPaymentDetails,
-        completion: @escaping (PaymentSheetResult) -> Void
+        confirmationExtras: LinkConfirmationExtras?,
+        completion: @escaping (PaymentSheetResult, STPAnalyticsClient.DeferredIntentConfirmationType?) -> Void
     )
     func confirmWithApplePay()
     func startInstantDebits(completion: @escaping (Result<ConsumerPaymentDetails, Error>) -> Void)
     func cancel()
     func accountUpdated(_ linkAccount: PaymentSheetLinkAccount)
-    func finish(withResult result: PaymentSheetResult)
+    func finish(withResult result: PaymentSheetResult, deferredIntentConfirmationType: STPAnalyticsClient.DeferredIntentConfirmationType?)
     func logout(cancel: Bool)
+    func bailToWebFlow()
 }
 
 /// A view controller for paying with Link.
@@ -70,6 +73,14 @@ final class PayWithLinkViewController: UINavigationController {
         var lastAddedPaymentDetails: ConsumerPaymentDetails?
         var analyticsHelper: PaymentSheetAnalyticsHelper
 
+        var secondaryButtonLabel: String {
+            if intent.isSettingUp {
+                String.Localized.continue_another_way
+            } else {
+                String.Localized.pay_another_way
+            }
+        }
+
         /// Creates a new Context object.
         /// - Parameters:
         ///   - intent: Intent.
@@ -93,7 +104,7 @@ final class PayWithLinkViewController: UINavigationController {
             self.configuration = configuration
             self.shouldOfferApplePay = shouldOfferApplePay
             self.shouldFinishOnClose = shouldFinishOnClose
-            self.callToAction = callToAction ?? intent.callToAction
+            self.callToAction = callToAction ?? .makeDefaultTypeForLink(intent: intent)
             self.analyticsHelper = analyticsHelper
         }
     }
@@ -115,6 +126,8 @@ final class PayWithLinkViewController: UINavigationController {
 
         return rootViewController is LoaderViewController
     }
+
+    private var isBailingToWebFlow: Bool = false
 
     convenience init(
         intent: Intent,
@@ -164,10 +177,36 @@ final class PayWithLinkViewController: UINavigationController {
         updateSupportedPaymentMethods()
         updateUI()
 
+        // Prewarm attestation if needed
+        Task {
+            // Attempt to attest
+            let canAttest = await context.configuration.apiClient.stripeAttest.prepareAttestation()
+            // If we can't attest and we're in livemode, let's bail and switch to the web controller
+            if !canAttest && !context.configuration.apiClient.isTestmode {
+                DispatchQueue.main.async {
+                    self.bailToWebFlow()
+                }
+                return
+            }
+        }
         // The internal delegate of the interactive pop gesture disables
         // the gesture when the navigation bar is hidden. Use a custom delegate
         // to restore the functionality.
         interactivePopGestureRecognizer?.delegate = self
+
+        LinkAccountContext.shared.addObserver(self, selector: #selector(onAccountChange(_:)))
+    }
+
+    deinit {
+        LinkAccountContext.shared.removeObserver(self)
+    }
+
+    @objc
+    func onAccountChange(_ notification: Notification) {
+        DispatchQueue.main.async { [weak self] in
+            let linkAccount = notification.object as? PaymentSheetLinkAccount
+            linkAccount?.paymentSheetLinkAccountDelegate = self
+        }
     }
 
     override func pushViewController(_ viewController: UIViewController, animated: Bool) {
@@ -227,7 +266,13 @@ private extension PayWithLinkViewController {
             return
         }
 
-        linkAccount.listPaymentDetails { result in
+        let supportedPaymentDetailsTypes = linkAccount
+            .supportedPaymentDetailsTypes(for: context.elementsSession)
+            .toSortedArray()
+
+        linkAccount.listPaymentDetails(
+            supportedTypes: supportedPaymentDetailsTypes
+        ) { result in
             switch result {
             case .success(let paymentDetails):
                 if paymentDetails.isEmpty {
@@ -249,7 +294,9 @@ private extension PayWithLinkViewController {
                 }
             case .failure(let error):
                 self.payWithLinkDelegate?.payWithLinkViewControllerDidFinish(
-                    self, result: PaymentSheetResult.failed(error: error)
+                    self,
+                    result: PaymentSheetResult.failed(error: error),
+                    deferredIntentConfirmationType: nil
                 )
             }
         }
@@ -292,7 +339,8 @@ extension PayWithLinkViewController: PayWithLinkCoordinating {
     func confirm(
         with linkAccount: PaymentSheetLinkAccount,
         paymentDetails: ConsumerPaymentDetails,
-        completion: @escaping (PaymentSheetResult) -> Void
+        confirmationExtras: LinkConfirmationExtras?,
+        completion: @escaping (PaymentSheetResult, STPAnalyticsClient.DeferredIntentConfirmationType?) -> Void
     ) {
         view.isUserInteractionEnabled = false
 
@@ -301,12 +349,15 @@ extension PayWithLinkViewController: PayWithLinkCoordinating {
             intent: context.intent,
             elementsSession: context.elementsSession,
             with: PaymentOption.link(
-                option: .withPaymentDetails(account: linkAccount, paymentDetails: paymentDetails)
+                option: .withPaymentDetails(
+                    account: linkAccount,
+                    paymentDetails: paymentDetails,
+                    confirmationExtras: confirmationExtras
+                )
             )
-        ) { [weak self] result, _ in
-//            TODO(link): Log confirmation type here
+        ) { [weak self] result, confirmationType in
             self?.view.isUserInteractionEnabled = true
-            completion(result)
+            completion(result, confirmationType)
         }
     }
 
@@ -316,14 +367,13 @@ extension PayWithLinkViewController: PayWithLinkCoordinating {
             intent: context.intent,
             elementsSession: context.elementsSession,
             with: .applePay
-        ) { [weak self] result, _ in
-            //            TODO(link): Log confirmation type here
+        ) { [weak self] result, confirmationType in
             switch result {
             case .canceled:
                 // no-op -- we don't dismiss/finish for canceled Apple Pay interactions
                 break
             case .completed, .failed:
-                self?.finish(withResult: result)
+                self?.finish(withResult: result, deferredIntentConfirmationType: confirmationType)
             }
         }
     }
@@ -338,9 +388,9 @@ extension PayWithLinkViewController: PayWithLinkCoordinating {
         updateUI()
     }
 
-    func finish(withResult result: PaymentSheetResult) {
+    func finish(withResult result: PaymentSheetResult, deferredIntentConfirmationType: STPAnalyticsClient.DeferredIntentConfirmationType?) {
         view.isUserInteractionEnabled = false
-        payWithLinkDelegate?.payWithLinkViewControllerDidFinish(self, result: result)
+        payWithLinkDelegate?.payWithLinkViewControllerDidFinish(self, result: result, deferredIntentConfirmationType: deferredIntentConfirmationType)
     }
 
     func logout(cancel: Bool) {
@@ -354,6 +404,38 @@ extension PayWithLinkViewController: PayWithLinkCoordinating {
         }
     }
 
+    // Dismiss the native Link VC and launch into the web Link flow
+    func bailToWebFlow() {
+        guard !isBailingToWebFlow else {
+            // Multiple things can kick off bailing to web flow, but we only want to do it once
+            return
+        }
+        isBailingToWebFlow = true
+        // Make sure we're presenting over a VC
+        guard let presentingViewController else {
+            // No VC to present over, so don't bail
+            return
+        }
+        // Make sure we have an active delegate that responds to all Link delegate methods
+        guard let payWithLinkWebDelegate = payWithLinkDelegate as? PayWithLinkWebControllerDelegate else {
+            stpAssertionFailure("Delegate doesn't exist or can't be transformed into a PayWithLinkWebControllerDelegate")
+            return
+        }
+        // Set up a web controller with the same settings and swap to it
+        let payWithLinkVC = PayWithLinkWebController(
+            intent: context.intent,
+            elementsSession: context.elementsSession,
+            configuration: context.configuration,
+            alwaysUseEphemeralSession: true
+        )
+        payWithLinkVC.payWithLinkDelegate = payWithLinkWebDelegate
+        // Dismis ourselves...
+        self.dismiss(animated: false)
+        // ... and present the web controller. (This presentation will be handled by ASWebAuthenticationSession)
+        payWithLinkVC.present(over: presentingViewController)
+        STPAnalyticsClient.sharedClient.logLinkBailedToWebFlow()
+    }
+
 }
 
 extension PayWithLinkViewController: STPAuthenticationContext {
@@ -362,4 +444,59 @@ extension PayWithLinkViewController: STPAuthenticationContext {
         return self
     }
 
+}
+
+extension PayWithLinkViewController: PaymentSheetLinkAccountDelegate {
+    func refreshLinkSession(completion: @escaping (Result<ConsumerSession, any Error>) -> Void) {
+        // Tell the LinkAccountService to lookup again
+        let accountService = LinkAccountService(apiClient: context.configuration.apiClient, elementsSession: context.elementsSession)
+        accountService.lookupAccount(
+            withEmail: linkAccount?.email,
+            emailSource: .prefilledEmail,
+            doNotLogConsumerFunnelEvent: false
+        ) { result in
+            switch result {
+            case .success(let account):
+                DispatchQueue.main.async {
+                    guard let account else {
+                        completion(.failure(PaymentSheetError.unknown(debugDescription: "No account found")))
+                        return
+                    }
+                    let verificationController = LinkVerificationController(
+                        mode: .modal,
+                        linkAccount: account,
+                        configuration: self.context.configuration
+                    )
+                    verificationController.present(from: self) { result in
+                        switch result {
+                        case .completed:
+                            // Return the session from the new account
+                            guard let newSession = account.currentSession else {
+                                completion(.failure(PaymentSheetError.unknown(debugDescription: "No session found")))
+                                return
+                            }
+                            completion(.success(newSession))
+                        case .canceled, .failed:
+                            completion(.failure(PaymentSheetError.unknown(debugDescription: "Authentication failed")))
+                        }
+                    }
+                }
+            case .failure(let error):
+                DispatchQueue.main.async {
+                    completion(.failure(error))
+                }
+            }
+        }
+
+    }
+
+}
+
+// Used to get deterministic ordering
+private extension Set where Element == ConsumerPaymentDetails.DetailsType {
+    func toSortedArray() -> [ConsumerPaymentDetails.DetailsType] {
+        return self.sorted { lhs, rhs in
+            lhs.rawValue.localizedCaseInsensitiveCompare(rhs.rawValue) == .orderedAscending
+        }
+    }
 }

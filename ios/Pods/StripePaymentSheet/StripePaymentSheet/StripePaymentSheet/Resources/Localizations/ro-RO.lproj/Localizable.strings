@@ -18,6 +18,8 @@
 
 "Add your payment information" = "Adăugați informațiile dvs. privind plata";
 
+"Agree and continue" = "Confirmare și continuare";
+
 "Approve payment" = "Aprobare plată";
 
 "Are you sure you want to remove this card?" = "Sigur doriți să eliminați acest card?";
@@ -32,9 +34,11 @@
 
 "Bank account details cannot be changed." = "Detaliile contului bancar nu pot fi modificate.";
 
-"Buy now or pay later with <img/>" = "Cumpărați acum sau plătiți mai târziu folosind <img/>";
+"Buy now or pay later with  <img/>" = "Cumpărați acum sau plătiți mai târziu folosind <img/>";
 
 "Buy now or pay later with Afterpay" = "Cumpărați acum sau plătiți mai târziu folosind Afterpay";
+
+"Buy now or pay later with Cash App Afterpay" = "Cumpărați acum sau plătiți mai târziu folosind Cash App Afterpay";
 
 "Buy now or pay later with Clearpay" = "Cumpărați acum sau plătiți mai târziu folosind Clearpay";
 
@@ -52,13 +56,15 @@
 
 "By continuing to Revolut Pay, you allow %@ to charge your Revolut Pay account for future payments in accordance with their terms." = "Prin continuarea cu Revolut Pay, permiteți %@ să vă taxeze contul Revolut Pay pentru plățile viitoare în conformitate cu termenii acesteia.";
 
+"By continuing you agree to the <terms>Terms</terms> and <privacy>Privacy Policy</privacy>." = "Continuând, sunteți de acord cu <terms>Termenii</terms> și <privacy>Politica de confidențialitate</privacy>.";
+
 "By continuing, you agree to authorize payments pursuant to <terms>these terms</terms>." = "Continuând, sunteți de acord să autorizați plățile în conformitate cu <terms>acești termeni</terms>.";
 
 "By continuing, you authorize %@ to debit your Cash App account for this payment and future payments in accordance with %@'s terms, until this authorization is revoked. You can change this anytime in your Cash App Settings." = "Continuând, autorizați %1$@ să debiteze contul dvs. Cash App pentru această plată și pentru plățile viitoare în conformitate cu termenii %2$@, până când această autorizație este revocată. Puteți schimba acest lucru oricând în setările Cash App.";
 
 "By joining Link, you agree to the <terms>Terms</terms> and <privacy>Privacy Policy</privacy>." = "Prin accesarea link-ului de asociere, sunteți de acord cu <terms>Termenii</terms> și <privacy>Politica de confidențialitate</privacy>.";
 
-"By providing your bank account details and confirming this payment, you agree to this Direct Debit Request and the <terms>Direct Debit Request service agreement</terms>, and authorise Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID number 507156 (“Stripe”) to debit your account through the Bulk Electronic Clearing System (BECS) on behalf of %@ (the \"Merchant\") for any amounts separately communicated to you by the Merchant. You certify that you are either an account holder or an authorised signatory on the account listed above." = "Prin furnizarea detaliilor contului dvs. bancar și confirmarea acestei plăți, sunteți de acord cu această Solicitare Direct Debit și cu <terms>Acordul de serviciu privind Solicitarea Direct Debit</terms> și autorizați Plățile Stripe Australia Pty Ltd ACN 160 180 343 număr ID utilizator Direct Debit 507156 („Stripe”) să vă debiteze contul prin intermediul Sistemului electronic de compensare colectivă (BECS) în numele %@ („Comerciantul”) pentru orice sume comunicate separat către dvs. de către Comerciant. Certificați faptul că sunteți fie un titular de cont, fie un semnatar autorizat în contul specificat mai sus.";
+"By providing your bank account details and confirming this payment, you agree to this Direct Debit Request and the <terms>Direct Debit Request service agreement</terms>, and authorise Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID number 507156 (“Stripe”) to debit your account through the Bulk Electronic Clearing System (BECS) on behalf of %@ (the \"Merchant\") for any amounts separately communicated to you by the Merchant. You certify that you are either an account holder or an authorised signatory on the account listed above." = "Prin furnizarea detaliilor contului bancar și confirmarea acestei plăți, sunteți de acord cu prezenta cerere de Debit Direct și cu <terms>acordul privind serviciul de Debit Direct</terms>, și autorizați Stripe Payments Australia Pty Ltd ACN 160 180 343, utilizator de Debit Direct cu ID-ul 507156 („Stripe”), să debiteze contul dvs. prin intermediul sistemului BECS (Bulk Electronic Clearing System) în numele %@ („Comerciantul”), pentru orice sume comunicate separat de către Comerciant. Declarați că sunteți fie titularul contului, fie un semnatar autorizat al contului menționat mai sus.";
 
 "By providing your card information, you allow %@ to charge your card for future payments in accordance with their terms." = "Prin furnizarea informațiilor despre cardul dvs., permiteți %@ să vă taxeze cardul pentru plățile viitoare în conformitate cu termenii acesteia.";
 
@@ -76,7 +82,7 @@
 
 "Card details cannot be changed." = "Detaliile cardului nu pot fi modificate.";
 
-"Change email" = "Schimbați adresa de e-mail";
+"Change" = "Modificare";
 
 "Choose a payment method" = "Alegeți o metodă de plată";
 
@@ -86,6 +92,10 @@
 
 "Confirm" = "Confirmare";
 
+"Confirm it's you" = "Confirmați că sunteți dvs.";
+
+"Confirm payment details" = "Confirmare detalii de plată";
+
 "Confirm the payment in your bank or payment app within %@ to complete the purchase." = "Confirmați plata în aplicația băncii dvs. sau în aplicația de plăți în termen de %@ pentru a finaliza achiziția.";
 
 "Confirm the payment in your bank's app within %@ to complete the purchase." = "Confirmați plata în aplicația băncii dvs. în termen de %@ pentru a finaliza achiziția.";
@@ -94,25 +104,33 @@
 
 "Contact information" = "Informații de contact";
 
+"Continue another way" = "Continuați într-un alt mod";
+
 "Default" = "Implicit";
+
+"Default payment method" = "Metodă de plată implicită";
 
 "EPS Bank" = "Banca EPS";
 
 "Enter address manually" = "Introduceți adresa manual";
 
-"Enter the code sent to %@ to use Link to pay by default." = "Introduceți codul trimis la %@ pentru a utiliza Link ca metodă de plată implicită";
-
-"Enter your verification code" = "Introduceți codul de verificare";
+"Enter the code sent to %@ to use your saved information." = "Introduceți codul pe care vi l-am trimis la %@ pentru a utiliza informațiile dvs. salvate.";
 
 "FPX Bank" = "FPX Bank";
 
+"Failed to connect" = "Eroare de conexiune";
+
+"Fast, secure, 1⁠-⁠click checkout" = "Finalizare a comenzii sigură și rapidă cu un singur clic";
+
 "For security, please re-enter your card’s security code." = "Din motive de securitate, vă rugăm să introduceți din nou codul de securitate al cardului dvs.";
+
+"Get %@ back when you pay for the first time with your bank. <terms>See terms</terms>" = "Primiți %@ înapoi atunci când plătiți pentru prima dată cu banca dvs. <terms>Consultați termenii</terms>";
+
+"Get %@ back when you pay with your bank. <terms>See terms</terms>" = "Primiți %@ înapoi atunci când plătiți cu banca dvs. <terms>Consultați termenii</terms>";
 
 "I understand that Stripe will be collecting Direct Debits on behalf of %@ and confirm that I am the account holder and the only person required to authorise debits from this account." = "Înțeleg că Stripe va colecta debite directe în numele %@ și confirm că sunt titularul contului și singura persoană necesară pentru a autoriza debite din acest cont.";
 
 "IBAN" = "IBAN";
-
-"Join Link" = "Înscrieți-vă în Link";
 
 "Log out of Link" = "Deconectare de la Link";
 
@@ -121,6 +139,8 @@
 "Manage US bank account" = "Gestionare cont bancar din SUA";
 
 "Manage card" = "Gestionare card";
+
+"Manage cards" = "Gestionare carduri";
 
 "Manage payment method" = "Gestionare metodă de plată";
 
@@ -134,7 +154,7 @@
 
 "New payment method" = "Metodă de plată nouă";
 
-"Not %@?" = "Nu este %@?";
+"No %@ promo" = "Fără promoție %@";
 
 "Only card brand can be changed." = "Doar marca cardului poate fi modificată.";
 
@@ -170,6 +190,8 @@
 
 "Payment methods" = "Metode de plată";
 
+"Please choose a valid payment method." = "Vă rugăm să selectați o metodă de plată validă.";
+
 "Please go back and select another payment method" = "Vă rugăm să reveniți și să selectați o altă metodă de plată";
 
 "Point the camera at your card." = "Îndreptați camera spre cardul dvs.";
@@ -202,9 +224,9 @@
 
 "Save your info for secure 1-click checkout with Link" = "Salvați-vă informațiile pentru o finalizare securizată a comenzii cu un singur clic cu Link";
 
-"Saved" = "Salvare efectuată";
+"Save your payment information with Link, and securely check out in 1-click on Link-supported sites." = "Salvați-vă informațiile privind plata cu Link și finalizați comanda în siguranță cu un singur clic pe site-urile acceptate de Link.";
 
-"Secure 1⁠-⁠click checkout" = "Finalizare securizată a comenzii cu un singur clic";
+"Saved" = "Salvare efectuată";
 
 "Select card" = "Selectare card";
 
@@ -222,8 +244,6 @@
 
 "Show menu" = "Afișare meniu";
 
-"Sign in to your Link account" = "Conectați-vă la contul dvs. Link";
-
 "Simple, secure one-click payments" = "Plăți simple și securizate cu un singur clic";
 
 "Something went wrong when linking your account.\nPlease try again later." = "Ceva nu a mers bine la asocierea contului dvs.\nVă rugăm să încercați din nou mai târziu.";
@@ -238,7 +258,7 @@
 
 "The IBAN you entered is incomplete." = "Codul IBAN pe care l-ați introdus nu este complet.";
 
-"The IBAN you entered is invalid, \"%@\" is not a supported country code." = "Codul IBAN pe care l-ați introdus nu este valid, „%@” nu este un cod de țară acceptat.";
+"The IBAN you entered is invalid, \"%@\" is not a supported country code." = "IBAN-ul introdus nu este valid, „%@” nu este un cod de țară acceptat.";
 
 "The provided verification code has expired." = "Codul de verificare furnizat a expirat.";
 
