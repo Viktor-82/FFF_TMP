@@ -1,0 +1,176 @@
+#name: FarmFresh iOS Build
+#
+#on:
+#  push:
+#    branches: [mac-dev]
+#  workflow_dispatch:  # Разрешает ручной запуск
+#
+#jobs:
+#  build:
+#    runs-on: macos-13  # macOS Ventura
+#    timeout-minutes: 45
+#
+#    env:
+#      NODE_OPTIONS: "--max-old-space-size=4096"
+#      RCT_NEW_ARCH_ENABLED: 0  # Отключаем Fabric/TurboModules
+#
+#    steps:
+#      # 1. Подготовка окружения
+#      - name: Checkout code
+#        uses: actions/checkout@v4
+#
+#      - name: Setup Node.js 20
+#        uses: actions/setup-node@v4
+#        with:
+#          node-version: "20.x"
+#          cache: 'npm'
+#
+#      # 2. Установка зависимостей
+#      - name: Install npm dependencies
+#        run: |
+#          npm ci --legacy-peer-deps
+#          cd ios && pod install --repo-update && cd ..
+#
+#      # 3. Настройка Xcode
+#      - name: Setup Xcode 15.2
+#        uses: maxim-lobanov/setup-xcode@v1
+#        with:
+#          xcode-version: '15.2'
+#
+#      # 4. Фиксы для React Native
+#      - name: Install Boost and Folly fixes
+#        run: |
+#          brew install boost
+#          export CPATH=$(brew --prefix boost)/include:$CPATH
+#          [ -d "$HOME/Library/Caches/CocoaPods" ] || pod setup
+#
+#      # 5. Сборка проекта
+#      - name: Build iOS (Simulator)
+#        run: |
+#          cd ios
+#          xcodebuild clean
+#          xcodebuild build \
+#            -workspace FarmFresh_Farmer.xcworkspace \
+#            -scheme FarmFresh_Farmer \
+#            -configuration Debug \
+#            -sdk iphonesimulator \
+#            -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.2' \
+#            CODE_SIGNING_ALLOWED=NO \
+#            | xcpretty
+#
+#      # 6. Сборка .ipa (если нужно)
+#      - name: Build .ipa (AdHoc)
+#        if: always()  # Запускается даже если предыдущий шаг упал
+#        run: |
+#          cd ios
+#          xcodebuild archive \
+#            -workspace FarmFresh_Farmer.xcworkspace \
+#            -scheme FarmFresh_Farmer \
+#            -configuration Release \
+#            -archivePath $PWD/build/FarmFresh_Farmer.xcarchive \
+#            -destination generic/platform=iOS \
+#            CODE_SIGNING_ALLOWED=NO
+#
+#          xcodebuild -exportArchive \
+#            -archivePath $PWD/build/FarmFresh_Farmer.xcarchive \
+#            -exportPath $PWD/build \
+#            -exportOptionsPlist $PWD/ExportOptions.plist \
+#            CODE_SIGNING_ALLOWED=NO
+#
+#      # 7. Артефакты
+#      - name: Upload artifacts
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: ios-build
+#          path: |
+#            ios/build/Build/Products/**/*.app
+#            ios/build/*.ipa
+#          if-no-files-found: warn
+
+name: FarmFresh iOS Build
+
+on:
+  push:
+    branches: [mac-dev]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-14 # Sonoma
+
+    timeout-minutes: 45
+
+    env:
+      NODE_OPTIONS: "--max-old-space-size=4096"
+      RCT_NEW_ARCH_ENABLED: 0
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: 'npm'
+
+      - name: Setup Ruby 3.1.2
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.1.2
+
+      - name: Setup Xcode 15.4
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '15.4'
+
+      - name: Install npm dependencies
+        run: |
+          npm ci --legacy-peer-deps
+          cd ios && pod install --repo-update && cd ..
+
+      - name: Install Boost and Folly fixes
+        run: |
+          brew install boost
+          export CPATH=$(brew --prefix boost)/include:$CPATH
+          [ -d "$HOME/Library/Caches/CocoaPods" ] || pod setup
+
+      - name: Build iOS (Simulator)
+        run: |
+          cd ios
+          xcodebuild clean
+          xcodebuild build \
+            -workspace FarmFresh_Farmer.xcworkspace \
+            -scheme FarmFresh_Farmer \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.2' \
+            CODE_SIGNING_ALLOWED=NO \
+            | xcpretty
+
+      - name: Build .ipa (AdHoc)
+        if: always()
+        run: |
+          cd ios
+          xcodebuild archive \
+            -workspace FarmFresh_Farmer.xcworkspace \
+            -scheme FarmFresh_Farmer \
+            -configuration Release \
+            -archivePath $PWD/build/FarmFresh_Farmer.xcarchive \
+            -destination generic/platform=iOS \
+            CODE_SIGNING_ALLOWED=NO
+
+          xcodebuild -exportArchive \
+            -archivePath $PWD/build/FarmFresh_Farmer.xcarchive \
+            -exportPath $PWD/build \
+            -exportOptionsPlist $PWD/ExportOptions.plist \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ios-build
+          path: |
+            ios/build/Build/Products/**/*.app
+            ios/build/*.ipa
+          if-no-files-found: warn
