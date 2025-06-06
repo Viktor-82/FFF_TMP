@@ -1,0 +1,15 @@
+{
+  "" : {
+    "dependencies" : "/Users/a1/develop/FarmFresh_Farmer/ios/DerivedData/FarmFresh_Farmer/Index.noindex/Build/Intermediates.noindex/FarmFresh_Farmer.build/Debug-iphonesimulator/FarmFresh_Farmer.build/Objects-normal/x86_64/FarmFresh_Farmer-master.d",
+    "diagnostics" : "/Users/a1/develop/FarmFresh_Farmer/ios/DerivedData/FarmFresh_Farmer/Index.noindex/Build/Intermediates.noindex/FarmFresh_Farmer.build/Debug-iphonesimulator/FarmFresh_Farmer.build/Objects-normal/x86_64/FarmFresh_Farmer-master.dia",
+    "emit-module-dependencies" : "/Users/a1/develop/FarmFresh_Farmer/ios/DerivedData/FarmFresh_Farmer/Index.noindex/Build/Intermediates.noindex/FarmFresh_Farmer.build/Debug-iphonesimulator/FarmFresh_Farmer.build/Objects-normal/x86_64/FarmFresh_Farmer-master-emit-module.d",
+    "emit-module-diagnostics" : "/Users/a1/develop/FarmFresh_Farmer/ios/DerivedData/FarmFresh_Farmer/Index.noindex/Build/Intermediates.noindex/FarmFresh_Farmer.build/Debug-iphonesimulator/FarmFresh_Farmer.build/Objects-normal/x86_64/FarmFresh_Farmer-master-emit-module.dia",
+    "swift-dependencies" : "/Users/a1/develop/FarmFresh_Farmer/ios/DerivedData/FarmFresh_Farmer/Index.noindex/Build/Intermediates.noindex/FarmFresh_Farmer.build/Debug-iphonesimulator/FarmFresh_Farmer.build/Objects-normal/x86_64/FarmFresh_Farmer-master.swiftdeps"
+  },
+  "/Users/a1/develop/FarmFresh_Farmer/ios/DerivedData/FarmFresh_Farmer/Index.noindex/Build/Intermediates.noindex/FarmFresh_Farmer.build/Debug-iphonesimulator/FarmFresh_Farmer.build/DerivedSources/GeneratedAssetSymbols.swift" : {
+
+  },
+  "/Users/a1/develop/FarmFresh_Farmer/ios/FarmFresh_Farmer/AppDelegate.swift" : {
+
+  }
+}

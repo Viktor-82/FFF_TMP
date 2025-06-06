@@ -1,0 +1,19 @@
+current directory: /Users/a1/develop/FarmFresh_Farmer/vendor/bundle/ruby/3.2.0/gems/nkf-0.2.0/ext/nkf
+/Users/a1/.rbenv/versions/3.2.2/bin/ruby extconf.rb
+creating Makefile
+
+current directory: /Users/a1/develop/FarmFresh_Farmer/vendor/bundle/ruby/3.2.0/gems/nkf-0.2.0/ext/nkf
+make DESTDIR\= sitearchdir\=./.gem.20250606-30903-3rmk5n sitelibdir\=./.gem.20250606-30903-3rmk5n clean
+
+current directory: /Users/a1/develop/FarmFresh_Farmer/vendor/bundle/ruby/3.2.0/gems/nkf-0.2.0/ext/nkf
+make DESTDIR\= sitearchdir\=./.gem.20250606-30903-3rmk5n sitelibdir\=./.gem.20250606-30903-3rmk5n
+compiling nkf.c
+linking shared-object nkf.bundle
+ld: warning: ignoring duplicate libraries: '-lruby.3.2'
+
+current directory: /Users/a1/develop/FarmFresh_Farmer/vendor/bundle/ruby/3.2.0/gems/nkf-0.2.0/ext/nkf
+make DESTDIR\= sitearchdir\=./.gem.20250606-30903-3rmk5n sitelibdir\=./.gem.20250606-30903-3rmk5n install
+/usr/bin/install -c -m 0755 nkf.bundle ./.gem.20250606-30903-3rmk5n
+
+current directory: /Users/a1/develop/FarmFresh_Farmer/vendor/bundle/ruby/3.2.0/gems/nkf-0.2.0/ext/nkf
+make DESTDIR\= sitearchdir\=./.gem.20250606-30903-3rmk5n sitelibdir\=./.gem.20250606-30903-3rmk5n clean

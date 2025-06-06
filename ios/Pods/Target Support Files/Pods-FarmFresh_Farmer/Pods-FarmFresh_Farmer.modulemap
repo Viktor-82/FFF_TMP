@@ -1,0 +1,6 @@
+module Pods_FarmFresh_Farmer {
+  umbrella header "Pods-FarmFresh_Farmer-umbrella.h"
+
+  export *
+  module * { export * }
+}

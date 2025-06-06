@@ -1,0 +1,6 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -workspace FarmFresh_Farmer.xcworkspace -scheme FarmFresh_Farmer -sdk iphonesimulator
+
+Build settings from command line:
+    SDKROOT = iphonesimulator18.4
+

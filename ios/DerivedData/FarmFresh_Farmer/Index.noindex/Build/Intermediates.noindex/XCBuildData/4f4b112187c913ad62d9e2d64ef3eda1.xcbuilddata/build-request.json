@@ -1,0 +1,48 @@
+{
+  "buildCommand" : {
+    "command" : "prepareForIndexing",
+    "enableIndexBuildArena" : true,
+    "targets" : null
+  },
+  "configuredTargets" : [
+    {
+      "guid" : "7a4a7528b94349ec1dfe5bbaa14d7b7f7ceb6b36bcfc2fb90f69ac96de4975d6"
+    }
+  ],
+  "containerPath" : "/Users/a1/develop/FarmFresh_Farmer/ios/FarmFresh_Farmer.xcworkspace",
+  "continueBuildingAfterErrors" : true,
+  "dependencyScope" : "workspace",
+  "enableIndexBuildArena" : false,
+  "hideShellScriptEnvironment" : false,
+  "parameters" : {
+    "action" : "indexbuild",
+    "arenaInfo" : {
+      "buildIntermediatesPath" : "/Users/a1/develop/FarmFresh_Farmer/ios/DerivedData/FarmFresh_Farmer/Index.noindex/Build/Intermediates.noindex",
+      "buildProductsPath" : "/Users/a1/develop/FarmFresh_Farmer/ios/DerivedData/FarmFresh_Farmer/Index.noindex/Build/Products",
+      "derivedDataPath" : "/Users/a1/develop/FarmFresh_Farmer/ios/DerivedData",
+      "indexDataStoreFolderPath" : "/Users/a1/develop/FarmFresh_Farmer/ios/DerivedData/FarmFresh_Farmer/Index.noindex/DataStore",
+      "indexEnableDataStore" : true,
+      "indexPCHPath" : "/Users/a1/develop/FarmFresh_Farmer/ios/DerivedData/FarmFresh_Farmer/Index.noindex/PrecompiledHeaders",
+      "indexRegularBuildIntermediatesPath" : "/Users/a1/develop/FarmFresh_Farmer/ios/DerivedData/FarmFresh_Farmer/Build/Intermediates.noindex",
+      "indexRegularBuildProductsPath" : "/Users/a1/develop/FarmFresh_Farmer/ios/DerivedData/FarmFresh_Farmer/Build/Products",
+      "pchPath" : "/Users/a1/develop/FarmFresh_Farmer/ios/DerivedData/FarmFresh_Farmer/Index.noindex/Build/Intermediates.noindex/PrecompiledHeaders"
+    },
+    "configurationName" : "Debug",
+    "overrides" : {
+      "synthesized" : {
+        "table" : {
+          "ENABLE_PREVIEWS" : "NO",
+          "ENABLE_XOJIT_PREVIEWS" : "NO",
+          "ONLY_ACTIVE_ARCH" : "YES"
+        }
+      }
+    }
+  },
+  "qos" : "utility",
+  "schemeCommand" : "launch",
+  "showNonLoggedProgress" : true,
+  "useDryRun" : false,
+  "useImplicitDependencies" : true,
+  "useLegacyBuildLocations" : false,
+  "useParallelTargets" : true
+}

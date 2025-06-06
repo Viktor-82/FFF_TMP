@@ -1,0 +1,1 @@
+../../../../../node_modules/tp-react-native-bluetooth-printer/ios/RNBluetoothManager.h

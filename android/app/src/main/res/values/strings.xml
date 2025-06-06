@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">FarmFresh_Farmer</string>
+    <string name="facebook_app_id">426692890469502</string>
+    <string name="facebook_client_token">ae2745f6e256090bc6c4e2ba297a649d</string>
+    <string name="google_maps_key">AIzaSyCxJi0ZngD78kV7LdnzxWDDheVdo1AR9JU</string>
+</resources>
