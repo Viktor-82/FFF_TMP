@@ -13,14 +13,12 @@ end
 target 'FarmFresh_Farmer' do
   config = use_native_modules!
 
-# pod 'RCT-Folly', :modular_headers => true
+  # НЕ ДОБАВЛЯТЬ pod 'RCT-Folly' !!!
 
   use_react_native!(
     :path => config[:reactNativePath],
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
-
-  # pre_install можно удалить, он не обязателен — переносим всё в post_install
 
   post_install do |installer|
     react_native_post_install(
@@ -29,7 +27,7 @@ target 'FarmFresh_Farmer' do
       :mac_catalyst_enabled => false
     )
 
-    # ГАРАНТИРОВАННО создаём CharTraits.h после pod install
+    # Костыль для CharTraits.h
     folly_header = File.join(__dir__, 'Pods', 'RCT-Folly', 'folly', 'portability', 'CharTraits.h')
     unless File.exist?(folly_header)
       FileUtils.mkdir_p(File.dirname(folly_header))
