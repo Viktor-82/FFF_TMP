@@ -2,7 +2,7 @@ name: FarmFresh iOS Build
 
 on:
   push:
-    branches: [mac-dev]
+    branches: [main]
   workflow_dispatch:
 
 jobs:

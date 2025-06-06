@@ -13,7 +13,7 @@ end
 target 'FarmFresh_Farmer' do
   config = use_native_modules!
 
-pod 'RCT-Folly', :modular_headers => true
+# pod 'RCT-Folly', :modular_headers => true
 
   use_react_native!(
     :path => config[:reactNativePath],
