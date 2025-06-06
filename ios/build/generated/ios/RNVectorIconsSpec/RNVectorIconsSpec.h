@@ -31,8 +31,6 @@
 #import <vector>
 
 
-NS_ASSUME_NONNULL_BEGIN
-
 @protocol NativeRNVectorIconsSpec <RCTBridgeModule, RCTTurboModule>
 
 - (void)getImageForFont:(NSString *)fontName
@@ -71,5 +69,4 @@ namespace facebook::react {
   };
 } // namespace facebook::react
 
-NS_ASSUME_NONNULL_END
 #endif // RNVectorIconsSpec_H

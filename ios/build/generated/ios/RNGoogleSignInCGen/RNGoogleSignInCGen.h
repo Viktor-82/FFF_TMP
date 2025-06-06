@@ -30,8 +30,6 @@
 #import <optional>
 #import <vector>
 
-
-NS_ASSUME_NONNULL_BEGIN
 namespace JS {
   namespace NativeGoogleSignin {
     struct Constants {
@@ -145,5 +143,4 @@ inline JS::NativeGoogleSignin::Constants::Builder::Builder(const Input i) : _fac
 inline JS::NativeGoogleSignin::Constants::Builder::Builder(Constants i) : _factory(^{
   return i.unsafeRawValue();
 }) {}
-NS_ASSUME_NONNULL_END
 #endif // RNGoogleSignInCGen_H

@@ -30,8 +30,6 @@
 #import <optional>
 #import <vector>
 
-
-NS_ASSUME_NONNULL_BEGIN
 namespace JS {
   namespace NativeModuleDatePicker {
     struct SpecOpenParamsDialogButtons {
@@ -442,5 +440,4 @@ inline std::optional<double> JS::NativeModuleTimePicker::SpecOpenParams::timeZon
   id const p = _v[@"timeZoneOffsetInMinutes"];
   return RCTBridgingToOptionalDouble(p);
 }
-NS_ASSUME_NONNULL_END
 #endif // RNDateTimePickerCGen_H

@@ -30,8 +30,6 @@
 #import <optional>
 #import <vector>
 
-
-NS_ASSUME_NONNULL_BEGIN
 namespace JS {
   namespace NativeRNCGeolocation {
     struct SpecSetConfigurationConfig {
@@ -153,5 +151,4 @@ inline std::optional<double> JS::NativeRNCGeolocation::GeolocationOptions::faste
   id const p = _v[@"fastestInterval"];
   return RCTBridgingToOptionalDouble(p);
 }
-NS_ASSUME_NONNULL_END
 #endif // RNCGeolocationSpec_H

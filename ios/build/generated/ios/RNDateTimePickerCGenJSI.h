@@ -28,12 +28,8 @@ public:
 template <typename T>
 class JSI_EXPORT NativeModuleDatePickerCxxSpec : public TurboModule {
 public:
-  jsi::Value create(jsi::Runtime &rt, const jsi::PropNameID &propName) override {
-    return delegate_.create(rt, propName);
-  }
-
-  std::vector<jsi::PropNameID> getPropertyNames(jsi::Runtime& runtime) override {
-    return delegate_.getPropertyNames(runtime);
+  jsi::Value get(jsi::Runtime &rt, const jsi::PropNameID &propName) override {
+    return delegate_.get(rt, propName);
   }
 
   static constexpr std::string_view kModuleName = "RNCDatePicker";
@@ -91,12 +87,8 @@ public:
 template <typename T>
 class JSI_EXPORT NativeModuleMaterialDatePickerCxxSpec : public TurboModule {
 public:
-  jsi::Value create(jsi::Runtime &rt, const jsi::PropNameID &propName) override {
-    return delegate_.create(rt, propName);
-  }
-
-  std::vector<jsi::PropNameID> getPropertyNames(jsi::Runtime& runtime) override {
-    return delegate_.getPropertyNames(runtime);
+  jsi::Value get(jsi::Runtime &rt, const jsi::PropNameID &propName) override {
+    return delegate_.get(rt, propName);
   }
 
   static constexpr std::string_view kModuleName = "RNCMaterialDatePicker";
@@ -154,12 +146,8 @@ public:
 template <typename T>
 class JSI_EXPORT NativeModuleMaterialTimePickerCxxSpec : public TurboModule {
 public:
-  jsi::Value create(jsi::Runtime &rt, const jsi::PropNameID &propName) override {
-    return delegate_.create(rt, propName);
-  }
-
-  std::vector<jsi::PropNameID> getPropertyNames(jsi::Runtime& runtime) override {
-    return delegate_.getPropertyNames(runtime);
+  jsi::Value get(jsi::Runtime &rt, const jsi::PropNameID &propName) override {
+    return delegate_.get(rt, propName);
   }
 
   static constexpr std::string_view kModuleName = "RNCMaterialTimePicker";
@@ -217,12 +205,8 @@ public:
 template <typename T>
 class JSI_EXPORT NativeModuleTimePickerCxxSpec : public TurboModule {
 public:
-  jsi::Value create(jsi::Runtime &rt, const jsi::PropNameID &propName) override {
-    return delegate_.create(rt, propName);
-  }
-
-  std::vector<jsi::PropNameID> getPropertyNames(jsi::Runtime& runtime) override {
-    return delegate_.getPropertyNames(runtime);
+  jsi::Value get(jsi::Runtime &rt, const jsi::PropNameID &propName) override {
+    return delegate_.get(rt, propName);
   }
 
   static constexpr std::string_view kModuleName = "RNCTimePicker";
