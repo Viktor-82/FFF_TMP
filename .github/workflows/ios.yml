@@ -23,7 +23,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20.x"
-          cache: 'npm'
+          cache: 'yarn'
 
       - name: Add symlink for Node.js (Hermes fix)
         run: |
@@ -39,9 +39,9 @@ jobs:
         with:
           xcode-version: '15.4'
 
-      - name: Install npm dependencies
+      - name: Install yarn dependencies
         run: |
-          npm ci --legacy-peer-deps
+          yarn install --frozen-lockfile
           cd ios && pod install --repo-update && cd ..
 
       - name: Install Boost and Folly fixes
