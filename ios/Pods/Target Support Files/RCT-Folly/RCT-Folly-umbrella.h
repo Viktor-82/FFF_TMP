@@ -260,6 +260,7 @@
 #import "folly/portability/Asm.h"
 #import "folly/portability/Atomic.h"
 #import "folly/portability/Builtins.h"
+#import "folly/portability/CharTraits.h"
 #import "folly/portability/Config.h"
 #import "folly/portability/Constexpr.h"
 #import "folly/portability/Dirent.h"

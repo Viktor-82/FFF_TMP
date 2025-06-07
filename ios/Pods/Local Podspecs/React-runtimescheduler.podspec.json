@@ -60,7 +60,7 @@
     "React-debug": [
 
     ],
-    "hermes-engine": [
+    "React-jsc": [
 
     ]
   }
