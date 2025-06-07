@@ -1,6 +1,0 @@
-#pragma once
-#include <string>
-namespace std {
-  template<>
-  struct char_traits<unsigned char> : char_traits<char> {};
-}

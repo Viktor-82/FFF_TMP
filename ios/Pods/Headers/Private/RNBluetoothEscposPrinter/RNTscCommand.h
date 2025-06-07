@@ -1,1 +1,0 @@
-../../../../../node_modules/tp-react-native-bluetooth-printer/ios/RNTscCommand.h

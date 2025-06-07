@@ -1,1 +1,0 @@
-../../../../../node_modules/react-native-document-scanner-plugin/ios/DocumentScanner-Bridging-Header.h

@@ -1,1 +1,0 @@
-sed -i '' 's/Connections_Bindings/Connections_Bindings/g' ios/Pods/Pods.xcodeproj/project.pbxproj

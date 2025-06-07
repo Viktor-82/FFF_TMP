@@ -1,1 +1,0 @@
-../../../../../node_modules/react-native-esc-pos-printer/ios/PrinterSDK/libepos2.xcframework/Headers/ePOS2.h

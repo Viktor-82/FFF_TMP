@@ -1,1 +1,0 @@
-../../../../../node_modules/react-native-esc-pos-printer/ios/ThePrinter.h
